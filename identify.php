@@ -5,6 +5,7 @@
  */
 
 require_once 'config.php';
+require_once 'database.php';
 
 // Initialize session
 initSession();
@@ -81,23 +82,25 @@ try {
     }
 
     // Store identification record
-    $database = getDatabase();
-    if (!isset($database['identifications'])) {
-        $database['identifications'] = [];
-    }
-
     $identificationRecord = [
-        'id' => uniqid('id_', true),
+        'identification_id' => uniqid('id_', true),
         'filename' => $uniqueFilename,
         'original_name' => sanitizeInput($uploadedFile['name']),
-        'species' => $identificationResult['data']['species'],
+        'species_name' => $identificationResult['data']['species'],
         'confidence' => $identificationResult['data']['confidence'],
-        'identification_time' => date('Y-m-d H:i:s'),
         'file_size' => $uploadedFile['size']
     ];
 
-    $database['identifications'][] = $identificationRecord;
-    saveDatabase($database);
+    try {
+        $db = getDatabase();
+        $recordId = $db->saveIdentification($identificationRecord);
+        logError('Identification record saved successfully', ['record_id' => $recordId]);
+    } catch (Exception $e) {
+        logError('Failed to save identification record to database', [
+            'identification_record' => $identificationRecord,
+            'error' => $e->getMessage()
+        ]);
+    }
 
     // Return identification results
     sendJSONResponse([
@@ -244,7 +247,7 @@ function identifyWithExternalAPI($imagePath, $apiKey, $apiUrl) {
         }
 
         // Get species information
-        $speciesInfo = getSpeciesInfo($species);
+        $speciesInfo = getSpeciesInfoFromDB($species);
 
         return [
             'success' => true,

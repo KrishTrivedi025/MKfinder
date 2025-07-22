@@ -122,6 +122,26 @@ The architecture supports easy migration to:
 
 ## Recent Changes
 
+### July 22, 2025 - Database Integration
+- **Migrated from JSON file storage to PostgreSQL database**
+  - Created proper database schema with optimized tables and indexes
+  - Implemented Database class with singleton pattern for connection management
+  - Added species table with JSONB support for structured characteristics data
+  - Created uploads and identifications tables with foreign key relationships
+  - Added comprehensive error handling and logging for database operations
+
+- **Enhanced Data Management**
+  - All species information now stored in PostgreSQL with better query performance
+  - Upload and identification history properly tracked with relationships
+  - Added pagination support for large datasets
+  - Implemented species statistics aggregation with database queries
+  - Added database connection testing and health monitoring
+
+- **Backward Compatibility**
+  - Maintained all existing API endpoints and functionality
+  - Updated PHP files to use new database layer transparently
+  - Preserved existing JSON file fallback for legacy compatibility
+
 ### July 22, 2025 - Added Bird Species Images
 - Created custom SVG illustrations for all 3 supported bird species:
   - American Robin with distinctive red breast and gray coloring

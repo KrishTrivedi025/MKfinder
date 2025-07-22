@@ -5,30 +5,28 @@
  */
 
 require_once 'config.php';
-
-// Get database
-$database = getDatabase();
-
-// Get identification history
-$identifications = isset($database['identifications']) ? array_reverse($database['identifications']) : [];
+require_once 'database.php';
 
 // Get species filter
 $speciesFilter = isset($_GET['species']) ? sanitizeInput($_GET['species']) : '';
 
-// Filter identifications if species filter is applied
-if (!empty($speciesFilter)) {
-    $identifications = array_filter($identifications, function($identification) use ($speciesFilter) {
-        return strcasecmp($identification['species'], $speciesFilter) === 0;
-    });
-}
-
 // Pagination
 $itemsPerPage = 12;
 $page = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
-$totalItems = count($identifications);
-$totalPages = ceil($totalItems / $itemsPerPage);
 $offset = ($page - 1) * $itemsPerPage;
-$paginatedIdentifications = array_slice($identifications, $offset, $itemsPerPage);
+
+// Get identification data from database
+try {
+    $db = getDatabase();
+    $totalItems = $db->countIdentifications($speciesFilter);
+    $totalPages = ceil($totalItems / $itemsPerPage);
+    $paginatedIdentifications = $db->getRecentIdentifications($itemsPerPage, $offset, $speciesFilter);
+} catch (Exception $e) {
+    logError('Failed to get identifications from database', ['error' => $e->getMessage()]);
+    $totalItems = 0;
+    $totalPages = 0;
+    $paginatedIdentifications = [];
+}
 
 // Get supported species for filter dropdown
 $supportedSpecies = SUPPORTED_SPECIES;
@@ -135,7 +133,7 @@ $supportedSpecies = SUPPORTED_SPECIES;
                             if (file_exists($imagePath)): 
                             ?>
                                 <img src="<?php echo htmlspecialchars($imagePath); ?>" 
-                                     alt="<?php echo htmlspecialchars($identification['species']); ?>" 
+                                     alt="<?php echo htmlspecialchars($identification['species_name']); ?>" 
                                      class="w-100">
                             <?php else: ?>
                                 <div class="d-flex align-items-center justify-content-center bg-light" style="height: 200px;">
@@ -144,7 +142,7 @@ $supportedSpecies = SUPPORTED_SPECIES;
                             <?php endif; ?>
                             
                             <div class="gallery-overlay">
-                                <h6 class="mb-1 fw-bold"><?php echo htmlspecialchars($identification['species']); ?></h6>
+                                <h6 class="mb-1 fw-bold"><?php echo htmlspecialchars($identification['species_name']); ?></h6>
                                 <div class="d-flex justify-content-between align-items-center">
                                     <span class="badge bg-success"><?php echo $identification['confidence']; ?>% confidence</span>
                                     <small><?php echo date('M j, Y', strtotime($identification['identification_time'])); ?></small>
@@ -225,7 +223,7 @@ $supportedSpecies = SUPPORTED_SPECIES;
         <?php endif; ?>
 
         <!-- Statistics -->
-        <?php if (!empty($identifications)): ?>
+        <?php if ($totalItems > 0): ?>
             <div class="row mt-5">
                 <div class="col-12">
                     <h3 class="fw-bold mb-4">
@@ -237,35 +235,32 @@ $supportedSpecies = SUPPORTED_SPECIES;
 
             <div class="row g-4">
                 <?php
-                // Calculate species statistics
-                $speciesStats = [];
-                foreach ($identifications as $identification) {
-                    $species = $identification['species'];
-                    if (!isset($speciesStats[$species])) {
-                        $speciesStats[$species] = ['count' => 0, 'avg_confidence' => 0, 'total_confidence' => 0];
-                    }
-                    $speciesStats[$species]['count']++;
-                    $speciesStats[$species]['total_confidence'] += $identification['confidence'];
-                    $speciesStats[$species]['avg_confidence'] = round($speciesStats[$species]['total_confidence'] / $speciesStats[$species]['count'], 1);
+                // Get species statistics from database
+                try {
+                    $db = getDatabase();
+                    $speciesStats = $db->getSpeciesStatistics();
+                } catch (Exception $e) {
+                    logError('Failed to get species statistics from database', ['error' => $e->getMessage()]);
+                    $speciesStats = [];
                 }
                 ?>
 
-                <?php foreach ($speciesStats as $species => $stats): ?>
+                <?php foreach ($speciesStats as $stats): ?>
                     <div class="col-md-4">
                         <div class="card border-0 shadow-sm">
                             <div class="card-body text-center">
-                                <h5 class="card-title"><?php echo htmlspecialchars($species); ?></h5>
+                                <h5 class="card-title"><?php echo htmlspecialchars($stats['species_name']); ?></h5>
                                 <div class="row">
                                     <div class="col-6">
-                                        <div class="text-primary fw-bold fs-4"><?php echo $stats['count']; ?></div>
+                                        <div class="text-primary fw-bold fs-4"><?php echo $stats['identification_count']; ?></div>
                                         <small class="text-muted">Identifications</small>
                                     </div>
                                     <div class="col-6">
-                                        <div class="text-success fw-bold fs-4"><?php echo $stats['avg_confidence']; ?>%</div>
+                                        <div class="text-success fw-bold fs-4"><?php echo round($stats['avg_confidence'], 1); ?>%</div>
                                         <small class="text-muted">Avg. Confidence</small>
                                     </div>
                                 </div>
-                                <a href="species.php?species=<?php echo urlencode($species); ?>" class="btn btn-outline-primary btn-sm mt-2">
+                                <a href="species.php?species=<?php echo urlencode($stats['species_name']); ?>" class="btn btn-outline-primary btn-sm mt-2">
                                     Learn More
                                 </a>
                             </div>

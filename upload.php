@@ -5,6 +5,7 @@
  */
 
 require_once 'config.php';
+require_once 'database.php';
 
 // Initialize session for CSRF protection
 initSession();
@@ -79,25 +80,25 @@ try {
     ];
 
     // Store upload record in database
-    $database = getDatabase();
-    if (!isset($database['uploads'])) {
-        $database['uploads'] = [];
-    }
-
     $uploadRecord = [
-        'id' => uniqid('upload_', true),
+        'upload_id' => uniqid('upload_', true),
         'filename' => $uniqueFilename,
         'original_name' => $fileInfo['original_name'],
-        'size' => $fileInfo['size'],
+        'file_size' => $fileInfo['size'],
         'mime_type' => $fileInfo['mime_type'],
-        'upload_time' => $fileInfo['upload_time'],
+        'file_path' => $uploadPath,
         'status' => 'uploaded'
     ];
 
-    $database['uploads'][] = $uploadRecord;
-    
-    if (!saveDatabase($database)) {
-        logError('Failed to save upload record to database', $uploadRecord);
+    try {
+        $db = getDatabase();
+        $recordId = $db->saveUpload($uploadRecord);
+        logError('Upload record saved successfully', ['record_id' => $recordId]);
+    } catch (Exception $e) {
+        logError('Failed to save upload record to database', [
+            'upload_record' => $uploadRecord,
+            'error' => $e->getMessage()
+        ]);
         // Continue execution - upload was successful even if database save failed
     }
 
@@ -106,7 +107,7 @@ try {
         'success' => true,
         'message' => getMessage('UPLOAD_SUCCESS'),
         'data' => [
-            'upload_id' => $uploadRecord['id'],
+            'upload_id' => $uploadRecord['upload_id'],
             'filename' => $uniqueFilename,
             'original_name' => $fileInfo['original_name'],
             'size' => $fileInfo['size'],

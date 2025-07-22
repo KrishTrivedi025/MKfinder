@@ -5,52 +5,32 @@
  */
 
 require_once 'config.php';
+require_once 'database.php';
 
 // Get species parameter
 $speciesName = isset($_GET['species']) ? sanitizeInput($_GET['species']) : '';
 
-// Get database
-$database = getDatabase();
-
 // Find species information
 $speciesInfo = null;
 if (!empty($speciesName)) {
-    $speciesInfo = getSpeciesInfo($speciesName);
+    $speciesInfo = getSpeciesInfoFromDB($speciesName);
 }
 
 // Get all species for listing
-$allSpecies = getAllSpecies();
+$allSpecies = getAllSpeciesFromDB();
 
 /**
- * Get species information
+ * Get species information (kept for fallback)
  */
 function getSpeciesInfo($speciesName) {
-    $database = getDatabase();
-    
-    if (isset($database['species'])) {
-        foreach ($database['species'] as $species) {
-            if (strcasecmp($species['name'], $speciesName) === 0) {
-                return $species;
-            }
-        }
-    }
-
-    // Return default information if not found
-    return getDefaultSpeciesInfo($speciesName);
+    return getSpeciesInfoFromDB($speciesName) ?: getDefaultSpeciesInfo($speciesName);
 }
 
 /**
- * Get all supported species
+ * Get all supported species (kept for fallback)
  */
 function getAllSpecies() {
-    $species = [];
-    foreach (SUPPORTED_SPECIES as $speciesName) {
-        $info = getSpeciesInfo($speciesName);
-        if (!empty($info)) {
-            $species[] = $info;
-        }
-    }
-    return $species;
+    return getAllSpeciesFromDB();
 }
 
 /**

@@ -185,9 +185,10 @@ function logError($message, $context = []) {
 }
 
 /**
- * Get database data
+ * Legacy database functions - kept for backward compatibility
+ * Now redirects to PostgreSQL database
  */
-function getDatabase() {
+function getLegacyDatabase() {
     if (!file_exists(DB_FILE)) {
         return ['species' => [], 'identifications' => []];
     }
@@ -204,9 +205,9 @@ function getDatabase() {
 }
 
 /**
- * Save database data
+ * Legacy save database function
  */
-function saveDatabase($data) {
+function saveLegacyDatabase($data) {
     $json = json_encode($data, JSON_PRETTY_PRINT);
     if (json_last_error() !== JSON_ERROR_NONE) {
         logError('Failed to encode database JSON: ' . json_last_error_msg());
