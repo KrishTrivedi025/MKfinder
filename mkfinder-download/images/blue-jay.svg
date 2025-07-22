@@ -1,0 +1,73 @@
+<svg width="300" height="200" viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+  <!-- Blue Jay SVG -->
+  <defs>
+    <linearGradient id="blueBody" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#3498db;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#2980b9;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="blueWing" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#5dade2;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#3498db;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="blueCrest" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#2e86de;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#54a0ff;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="300" height="200" fill="#e6f3ff"/>
+  
+  <!-- Branch -->
+  <rect x="0" y="160" width="300" height="8" rx="4" fill="#8b4513"/>
+  
+  <!-- Bird Body -->
+  <ellipse cx="150" cy="120" rx="40" ry="30" fill="url(#blueBody)"/>
+  
+  <!-- Bird Breast/Belly (white) -->
+  <ellipse cx="150" cy="130" rx="30" ry="20" fill="white"/>
+  
+  <!-- Bird Head -->
+  <circle cx="135" cy="90" r="22" fill="url(#blueBody)"/>
+  
+  <!-- Prominent Crest -->
+  <path d="M 125 70 Q 130 55 140 60 Q 145 50 150 65 Q 145 75 135 75 Q 130 70 125 70" fill="url(#blueCrest)"/>
+  
+  <!-- Black necklace markings -->
+  <path d="M 120 105 Q 135 110 150 105 Q 165 110 180 105" stroke="black" stroke-width="4" fill="none"/>
+  
+  <!-- Eye -->
+  <circle cx="130" cy="85" r="6" fill="black"/>
+  <circle cx="132" cy="83" r="2" fill="white"/>
+  
+  <!-- Black beak -->
+  <polygon points="110,88 100,90 110,92" fill="black"/>
+  
+  <!-- Wing with barred pattern -->
+  <ellipse cx="165" cy="115" rx="25" ry="18" fill="url(#blueWing)"/>
+  
+  <!-- Wing bars (white and black) -->
+  <rect x="155" y="105" width="20" height="2" fill="white"/>
+  <rect x="155" y="110" width="20" height="2" fill="black"/>
+  <rect x="155" y="115" width="20" height="2" fill="white"/>
+  <rect x="155" y="120" width="20" height="2" fill="black"/>
+  <rect x="155" y="125" width="20" height="2" fill="white"/>
+  
+  <!-- Tail with barred pattern -->
+  <ellipse cx="185" cy="125" rx="30" ry="15" fill="url(#blueBody)"/>
+  <rect x="170" y="118" width="30" height="2" fill="white"/>
+  <rect x="170" y="123" width="30" height="2" fill="black"/>
+  <rect x="170" y="128" width="30" height="2" fill="white"/>
+  <rect x="170" y="133" width="30" height="2" fill="black"/>
+  
+  <!-- Legs -->
+  <rect x="145" y="145" width="3" height="18" fill="black"/>
+  <rect x="155" y="145" width="3" height="18" fill="black"/>
+  
+  <!-- Feet -->
+  <ellipse cx="147" cy="165" rx="7" ry="3" fill="black"/>
+  <ellipse cx="157" cy="165" rx="7" ry="3" fill="black"/>
+  
+  <!-- Black markings around head -->
+  <path d="M 115 85 Q 125 80 135 85" stroke="black" stroke-width="2" fill="none"/>
+</svg>
