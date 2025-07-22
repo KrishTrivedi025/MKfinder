@@ -1,0 +1,65 @@
+<svg width="300" height="200" viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+  <!-- Northern Cardinal (Male) SVG -->
+  <defs>
+    <linearGradient id="cardinalRed" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#e74c3c;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#c0392b;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="cardinalDeepRed" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#c0392b;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#a93226;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="cardinalCrest" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#dc143c;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#b91c3c;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="300" height="200" fill="#fff5f5"/>
+  
+  <!-- Branch -->
+  <rect x="0" y="160" width="300" height="8" rx="4" fill="#8b4513"/>
+  
+  <!-- Bird Body (bright red) -->
+  <ellipse cx="150" cy="120" rx="40" ry="32" fill="url(#cardinalRed)"/>
+  
+  <!-- Bird Head -->
+  <circle cx="135" cy="90" r="25" fill="url(#cardinalRed)"/>
+  
+  <!-- Prominent Red Crest -->
+  <path d="M 125 65 Q 130 45 140 50 Q 145 40 150 55 Q 155 45 160 60 Q 150 70 135 70 Q 130 65 125 65" fill="url(#cardinalCrest)"/>
+  
+  <!-- Black face mask around beak and eyes -->
+  <path d="M 110 85 Q 120 78 130 85 Q 135 80 140 85 Q 135 95 125 95 Q 115 90 110 85" fill="black"/>
+  
+  <!-- Eye within mask -->
+  <circle cx="125" cy="85" r="4" fill="white"/>
+  <circle cx="125" cy="85" r="2" fill="black"/>
+  
+  <!-- Thick orange-red beak -->
+  <polygon points="105,88 95,90 105,92" fill="#ff4500"/>
+  <polygon points="105,88 100,85 105,90" fill="#ff6b35"/>
+  
+  <!-- Wing details -->
+  <ellipse cx="165" cy="115" rx="22" ry="20" fill="url(#cardinalDeepRed)"/>
+  
+  <!-- Tail -->
+  <ellipse cx="185" cy="125" rx="28" ry="18" fill="url(#cardinalDeepRed)"/>
+  
+  <!-- Legs -->
+  <rect x="145" y="145" width="4" height="18" fill="#8b4513"/>
+  <rect x="155" y="145" width="4" height="18" fill="#8b4513"/>
+  
+  <!-- Feet -->
+  <ellipse cx="147" cy="165" rx="8" ry="3" fill="#8b4513"/>
+  <ellipse cx="157" cy="165" rx="8" ry="3" fill="#8b4513"/>
+  
+  <!-- Some feather details -->
+  <path d="M 145 105 Q 155 100 165 105" stroke="#a93226" stroke-width="1" fill="none"/>
+  <path d="M 145 115 Q 155 110 165 115" stroke="#a93226" stroke-width="1" fill="none"/>
+  <path d="M 145 125 Q 155 120 165 125" stroke="#a93226" stroke-width="1" fill="none"/>
+  
+  <!-- Subtle shading on belly -->
+  <ellipse cx="150" cy="135" rx="25" ry="15" fill="url(#cardinalDeepRed)" opacity="0.6"/>
+</svg>

@@ -119,3 +119,15 @@ The architecture supports easy migration to:
 - **Solution**: Bootstrap framework with custom CSS overrides
 - **Rationale**: Rapid development, proven responsive patterns, extensive documentation
 - **Trade-offs**: Larger CSS footprint but significant development time savings
+
+## Recent Changes
+
+### July 22, 2025 - Added Bird Species Images
+- Created custom SVG illustrations for all 3 supported bird species:
+  - American Robin with distinctive red breast and gray coloring
+  - Blue Jay with bright blue coloration and prominent crest
+  - Northern Cardinal with vibrant red plumage and black mask
+- Enhanced species information pages with visual bird representations
+- Added images to species cards in both list and detail views
+- Improved sidebar navigation with thumbnail images
+- All images are custom-created SVG files ensuring authentic visual representation

@@ -161,6 +161,27 @@ function getDefaultSpeciesInfo($speciesName) {
             <div class="row">
                 <div class="col-lg-8">
                     <div class="card shadow-lg border-0">
+                        <?php 
+                        // Get species image for detail view
+                        $detailImageFile = '';
+                        switch($speciesInfo['name']) {
+                            case 'American Robin':
+                                $detailImageFile = 'images/american-robin.svg';
+                                break;
+                            case 'Blue Jay':
+                                $detailImageFile = 'images/blue-jay.svg';
+                                break;
+                            case 'Northern Cardinal':
+                                $detailImageFile = 'images/northern-cardinal.svg';
+                                break;
+                        }
+                        ?>
+                        <?php if ($detailImageFile && file_exists($detailImageFile)): ?>
+                            <img src="<?php echo $detailImageFile; ?>" 
+                                 class="card-img-top" 
+                                 alt="<?php echo htmlspecialchars($speciesInfo['name']); ?>"
+                                 style="height: 250px; object-fit: cover;">
+                        <?php endif; ?>
                         <div class="card-body p-5">
                             <div class="d-flex align-items-center mb-4">
                                 <h1 class="display-5 fw-bold mb-0 me-3"><?php echo htmlspecialchars($speciesInfo['name']); ?></h1>
@@ -275,10 +296,32 @@ function getDefaultSpeciesInfo($speciesName) {
                             <div class="list-group list-group-flush">
                                 <?php foreach ($allSpecies as $species): ?>
                                     <?php if ($species['name'] !== $speciesInfo['name']): ?>
+                                        <?php 
+                                        $sidebarImageFile = '';
+                                        switch($species['name']) {
+                                            case 'American Robin':
+                                                $sidebarImageFile = 'images/american-robin.svg';
+                                                break;
+                                            case 'Blue Jay':
+                                                $sidebarImageFile = 'images/blue-jay.svg';
+                                                break;
+                                            case 'Northern Cardinal':
+                                                $sidebarImageFile = 'images/northern-cardinal.svg';
+                                                break;
+                                        }
+                                        ?>
                                         <a href="species.php?species=<?php echo urlencode($species['name']); ?>" 
-                                           class="list-group-item list-group-item-action border-0">
-                                            <div class="fw-bold"><?php echo htmlspecialchars($species['name']); ?></div>
-                                            <small class="text-muted"><?php echo htmlspecialchars($species['scientific_name']); ?></small>
+                                           class="list-group-item list-group-item-action border-0 d-flex align-items-center">
+                                            <?php if ($sidebarImageFile && file_exists($sidebarImageFile)): ?>
+                                                <img src="<?php echo $sidebarImageFile; ?>" 
+                                                     alt="<?php echo htmlspecialchars($species['name']); ?>"
+                                                     style="width: 50px; height: 40px; object-fit: cover; border-radius: 6px;" 
+                                                     class="me-3">
+                                            <?php endif; ?>
+                                            <div>
+                                                <div class="fw-bold"><?php echo htmlspecialchars($species['name']); ?></div>
+                                                <small class="text-muted"><?php echo htmlspecialchars($species['scientific_name']); ?></small>
+                                            </div>
                                         </a>
                                     <?php endif; ?>
                                 <?php endforeach; ?>
@@ -304,6 +347,27 @@ function getDefaultSpeciesInfo($speciesName) {
                     <?php foreach ($allSpecies as $species): ?>
                         <div class="col-lg-4 col-md-6">
                             <div class="card species-card shadow border-0 h-100">
+                                <?php 
+                                // Get species image
+                                $imageFile = '';
+                                switch($species['name']) {
+                                    case 'American Robin':
+                                        $imageFile = 'images/american-robin.svg';
+                                        break;
+                                    case 'Blue Jay':
+                                        $imageFile = 'images/blue-jay.svg';
+                                        break;
+                                    case 'Northern Cardinal':
+                                        $imageFile = 'images/northern-cardinal.svg';
+                                        break;
+                                }
+                                ?>
+                                <?php if ($imageFile && file_exists($imageFile)): ?>
+                                    <img src="<?php echo $imageFile; ?>" 
+                                         class="card-img-top" 
+                                         alt="<?php echo htmlspecialchars($species['name']); ?>"
+                                         style="height: 200px; object-fit: cover;">
+                                <?php endif; ?>
                                 <div class="card-body p-4">
                                     <h5 class="card-title fw-bold"><?php echo htmlspecialchars($species['name']); ?></h5>
                                     <p class="text-muted small mb-2"><?php echo htmlspecialchars($species['scientific_name']); ?></p>
