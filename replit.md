@@ -1,0 +1,121 @@
+# MKfinder - Bird Species Identification System
+
+## Overview
+
+MKfinder is a web-based bird species identification application that allows users to upload images of birds and receive species identification. The system currently supports identification of three bird species: American Robin, Blue Jay, and Northern Cardinal. The application features a clean, responsive interface built with Bootstrap and includes a comprehensive species database with detailed information about each bird.
+
+## User Preferences
+
+Preferred communication style: Simple, everyday language.
+
+## System Architecture
+
+### Frontend Architecture
+The application uses a traditional client-side web architecture with:
+- **HTML5** for structure and semantic markup
+- **CSS3** with custom variables and Bootstrap 5.3.0 for responsive styling
+- **Vanilla JavaScript** for interactive functionality and user interface management
+- **Font Awesome 6.0.0** for iconography
+
+The frontend follows a component-based approach with clearly separated concerns:
+- Presentation layer (HTML/CSS)
+- Business logic layer (JavaScript)
+- Data layer (JSON database)
+
+### Backend Architecture
+Currently implemented as a static web application with:
+- **Client-side processing** for image handling and preview
+- **JSON-based data storage** for species information
+- **File-based architecture** without server-side processing
+
+Note: The system appears to be designed for future backend integration, with placeholder functionality for image identification services.
+
+## Key Components
+
+### 1. Species Database (`database.json`)
+- **Purpose**: Stores comprehensive bird species information
+- **Structure**: JSON array containing species objects with standardized fields
+- **Data Fields**: 
+  - Basic info (name, scientific name, description)
+  - Physical characteristics
+  - Habitat information
+  - Behavioral patterns
+  - Diet information
+  - Conservation status
+
+### 2. User Interface Components
+- **Upload Interface**: Drag-and-drop file upload with visual feedback
+- **Image Preview**: Real-time preview of uploaded images
+- **Identification Results**: Display area for species identification results
+- **Navigation**: Bootstrap-based responsive navigation system
+
+### 3. JavaScript Application Logic (`script.js`)
+- **File Handling**: Image upload, validation, and preview functionality
+- **State Management**: Upload states, loading states, and result display
+- **Event Management**: Comprehensive event listener system for user interactions
+- **Error Handling**: User-friendly error messaging and validation
+
+### 4. Styling System (`styles.css`)
+- **CSS Custom Properties**: Centralized color scheme and design tokens
+- **Responsive Design**: Mobile-first approach with Bootstrap integration
+- **Component Styling**: Modular CSS for reusable interface components
+
+## Data Flow
+
+1. **Image Upload**: User selects or drags image file into upload area
+2. **File Validation**: JavaScript validates file type and size
+3. **Preview Generation**: Image preview is displayed to user
+4. **Identification Request**: User triggers identification process
+5. **Results Display**: Species information is retrieved from JSON database and displayed
+6. **Reset Functionality**: User can clear results and upload new image
+
+## External Dependencies
+
+### CDN-Hosted Libraries
+- **Bootstrap 5.3.0**: UI framework for responsive design and components
+- **Font Awesome 6.0.0**: Icon library for user interface enhancement
+
+### Rationale for CDN Usage
+- Faster loading times through CDN caching
+- Reduced server bandwidth requirements
+- Automatic updates and maintenance
+- High availability and reliability
+
+## Deployment Strategy
+
+### Current Implementation
+- **Static File Hosting**: All files can be served from any web server
+- **No Server Requirements**: Pure client-side application
+- **Cross-Platform Compatibility**: Works on any device with modern web browser
+
+### Future Considerations
+The architecture supports easy migration to:
+- **Server-side Processing**: For actual AI/ML bird identification
+- **Database Integration**: Migration from JSON to proper database system
+- **API Architecture**: RESTful API for species data and identification services
+- **Cloud Deployment**: Easy deployment to platforms like Vercel, Netlify, or traditional hosting
+
+### Development Environment
+- Compatible with Replit's web hosting capabilities
+- No special server configuration required
+- Live preview available through standard web server
+
+## Technical Decisions
+
+### File-Based Database Choice
+- **Problem**: Need for structured species data storage
+- **Solution**: JSON file-based database
+- **Rationale**: Simple implementation, easy to modify, no database server required
+- **Trade-offs**: Limited scalability but perfect for current scope
+
+### Vanilla JavaScript Approach
+- **Problem**: Need for interactive functionality
+- **Solution**: Pure JavaScript without frameworks
+- **Rationale**: Lightweight, no build process, easier debugging
+- **Trade-offs**: More verbose code but better performance and simpler deployment
+
+### Bootstrap Integration
+- **Problem**: Need for responsive, professional UI quickly
+- **Solution**: Bootstrap framework with custom CSS overrides
+- **Rationale**: Rapid development, proven responsive patterns, extensive documentation
+- **Trade-offs**: Larger CSS footprint but significant development time savings
