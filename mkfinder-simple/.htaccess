@@ -1,0 +1,29 @@
+# MKfinder - Remove authentication requirements
+# This file ensures no username/password prompts
+
+# Disable authentication
+AuthType None
+Require all granted
+
+# Allow access to all files
+<Files "*">
+    Allow from all
+    Require all granted
+</Files>
+
+# Enable PHP processing
+<Files "*.php">
+    SetHandler application/x-httpd-php
+</Files>
+
+# Default document
+DirectoryIndex index.php index.html
+
+# Prevent access to sensitive files
+<Files "*.sql">
+    Deny from all
+</Files>
+
+<Files "*.log">
+    Deny from all
+</Files>
