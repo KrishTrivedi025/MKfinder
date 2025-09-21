@@ -1,8 +1,9 @@
 // Global variables
 let selectedFile = null;
 let isUploading = false;
+let currentUser = null;
 
-// DOM elements
+// DOM elements - Main App
 const uploadArea = document.getElementById('uploadArea');
 const imageInput = document.getElementById('imageInput');
 const previewSection = document.getElementById('previewSection');
@@ -15,48 +16,398 @@ const resultsContent = document.getElementById('resultsContent');
 const errorSection = document.getElementById('errorSection');
 const errorContent = document.getElementById('errorContent');
 
-// Initialize event listeners when DOM is loaded
+// DOM elements - Authentication
+const authSection = document.getElementById('auth-section');
+const mainApp = document.getElementById('main-app');
+const welcomeCard = document.getElementById('welcome-card');
+const loginCard = document.getElementById('login-card');
+const signupCard = document.getElementById('signup-card');
+const loginForm = document.getElementById('loginForm');
+const signupForm = document.getElementById('signupForm');
+const loginError = document.getElementById('loginError');
+const signupError = document.getElementById('signupError');
+const userEmail = document.getElementById('userEmail');
+const loadingOverlay = document.getElementById('loadingOverlay');
+
+// Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
+    initializeApp();
+});
+
+/**
+ * Initialize the application
+ */
+async function initializeApp() {
     initializeEventListeners();
     hideAllSections();
-});
+    
+    // Check if user is already authenticated
+    await checkAuthStatus();
+}
 
 /**
  * Initialize all event listeners
  */
 function initializeEventListeners() {
-    // Upload area click event
-    uploadArea.addEventListener('click', () => {
-        if (!isUploading) {
-            imageInput.click();
-        }
-    });
+    // Authentication form listeners
+    if (loginForm) {
+        loginForm.addEventListener('submit', handleLogin);
+    }
+    if (signupForm) {
+        signupForm.addEventListener('submit', handleSignup);
+    }
 
-    // File input change event
-    imageInput.addEventListener('change', handleFileSelect);
+    // Main app listeners (only add if elements exist)
+    if (uploadArea) {
+        // Upload area click event
+        uploadArea.addEventListener('click', () => {
+            if (!isUploading) {
+                imageInput.click();
+            }
+        });
 
-    // Drag and drop events
-    uploadArea.addEventListener('dragover', handleDragOver);
-    uploadArea.addEventListener('dragleave', handleDragLeave);
-    uploadArea.addEventListener('drop', handleDrop);
+        // Drag and drop events
+        uploadArea.addEventListener('dragover', handleDragOver);
+        uploadArea.addEventListener('dragleave', handleDragLeave);
+        uploadArea.addEventListener('drop', handleDrop);
+    }
 
-    // Button events
-    identifyBtn.addEventListener('click', identifyBird);
-    resetBtn.addEventListener('click', resetUpload);
+    if (imageInput) {
+        // File input change event
+        imageInput.addEventListener('change', handleFileSelect);
+    }
+
+    if (identifyBtn) {
+        // Button events
+        identifyBtn.addEventListener('click', identifyBird);
+    }
+    
+    if (resetBtn) {
+        resetBtn.addEventListener('click', resetUpload);
+    }
 
     // Prevent default drag behaviors on document
     document.addEventListener('dragover', (e) => e.preventDefault());
     document.addEventListener('drop', (e) => e.preventDefault());
 }
 
+// =========================
+// AUTHENTICATION FUNCTIONS
+// =========================
+
+/**
+ * Check authentication status
+ */
+async function checkAuthStatus() {
+    try {
+        const response = await fetch('auth.php?action=check');
+        const data = await response.json();
+        
+        if (data.success && data.authenticated) {
+            currentUser = data.user;
+            showMainApp();
+            updateNavigationForLoggedInUser();
+        } else {
+            currentUser = null;
+            showAuthSection();
+            updateNavigationForGuestUser();
+        }
+    } catch (error) {
+        console.error('Error checking auth status:', error);
+        showAuthSection();
+        updateNavigationForGuestUser();
+    }
+}
+
+/**
+ * Handle login form submission
+ */
+async function handleLogin(event) {
+    event.preventDefault();
+    
+    const email = document.getElementById('loginEmail').value.trim();
+    const password = document.getElementById('loginPassword').value;
+    
+    if (!email || !password) {
+        showLoginError('Please enter both email and password');
+        return;
+    }
+    
+    showLoadingOverlay();
+    hideLoginError();
+    
+    try {
+        const response = await fetch('auth.php?action=login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                email: email,
+                password: password
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            currentUser = data.user;
+            showMainApp();
+            updateNavigationForLoggedInUser();
+            loginForm.reset();
+        } else {
+            showLoginError(data.message || 'Login failed');
+        }
+    } catch (error) {
+        console.error('Login error:', error);
+        showLoginError('Network error. Please try again.');
+    } finally {
+        hideLoadingOverlay();
+    }
+}
+
+/**
+ * Handle signup form submission
+ */
+async function handleSignup(event) {
+    event.preventDefault();
+    
+    const email = document.getElementById('signupEmail').value.trim();
+    const phone = document.getElementById('signupPhone').value.trim();
+    const password = document.getElementById('signupPassword').value;
+    const confirmPassword = document.getElementById('confirmPassword').value;
+    
+    // Client-side validation
+    if (!email || !phone || !password || !confirmPassword) {
+        showSignupError('Please fill in all fields');
+        return;
+    }
+    
+    if (password !== confirmPassword) {
+        showSignupError('Passwords do not match');
+        return;
+    }
+    
+    if (password.length < 6) {
+        showSignupError('Password must be at least 6 characters long');
+        return;
+    }
+    
+    showLoadingOverlay();
+    hideSignupError();
+    
+    try {
+        const response = await fetch('auth.php?action=signup', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                email: email,
+                phone: phone,
+                password: password,
+                confirmPassword: confirmPassword
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            // Registration successful, show login form
+            showLoginForm();
+            showSuccessMessage('Account created successfully! Please login with your new credentials.');
+            signupForm.reset();
+        } else {
+            showSignupError(data.message || 'Registration failed');
+        }
+    } catch (error) {
+        console.error('Signup error:', error);
+        showSignupError('Network error. Please try again.');
+    } finally {
+        hideLoadingOverlay();
+    }
+}
+
+/**
+ * Handle logout
+ */
+async function handleLogout() {
+    try {
+        showLoadingOverlay();
+        
+        const response = await fetch('auth.php?action=logout', {
+            method: 'POST'
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            currentUser = null;
+            showAuthSection();
+            updateNavigationForGuestUser();
+            resetUpload();
+        }
+    } catch (error) {
+        console.error('Logout error:', error);
+    } finally {
+        hideLoadingOverlay();
+    }
+}
+
+// =========================
+// UI DISPLAY FUNCTIONS
+// =========================
+
+/**
+ * Show authentication section
+ */
+function showAuthSection() {
+    if (authSection) authSection.style.display = 'block';
+    if (mainApp) mainApp.style.display = 'none';
+    showWelcome();
+}
+
+/**
+ * Show main application
+ */
+function showMainApp() {
+    if (authSection) authSection.style.display = 'none';
+    if (mainApp) mainApp.style.display = 'block';
+    hideAllSections();
+}
+
+/**
+ * Show welcome card
+ */
+function showWelcome() {
+    if (welcomeCard) welcomeCard.style.display = 'block';
+    if (loginCard) loginCard.style.display = 'none';
+    if (signupCard) signupCard.style.display = 'none';
+    hideLoginError();
+    hideSignupError();
+}
+
+/**
+ * Show login form
+ */
+function showLoginForm() {
+    if (welcomeCard) welcomeCard.style.display = 'none';
+    if (loginCard) loginCard.style.display = 'block';
+    if (signupCard) signupCard.style.display = 'none';
+    hideSignupError();
+    
+    // Focus on email field
+    setTimeout(() => {
+        const emailField = document.getElementById('loginEmail');
+        if (emailField) emailField.focus();
+    }, 100);
+}
+
+/**
+ * Show signup form
+ */
+function showSignupForm() {
+    if (welcomeCard) welcomeCard.style.display = 'none';
+    if (loginCard) loginCard.style.display = 'none';
+    if (signupCard) signupCard.style.display = 'block';
+    hideLoginError();
+    
+    // Focus on email field
+    setTimeout(() => {
+        const emailField = document.getElementById('signupEmail');
+        if (emailField) emailField.focus();
+    }, 100);
+}
+
+/**
+ * Update navigation for logged in user
+ */
+function updateNavigationForLoggedInUser() {
+    const authNavItems = document.querySelectorAll('.auth-nav');
+    const appNavItems = document.querySelectorAll('.app-nav');
+    
+    authNavItems.forEach(item => item.style.display = 'none');
+    appNavItems.forEach(item => item.style.display = 'block');
+    
+    if (userEmail && currentUser) {
+        userEmail.textContent = currentUser.email;
+    }
+}
+
+/**
+ * Update navigation for guest user
+ */
+function updateNavigationForGuestUser() {
+    const authNavItems = document.querySelectorAll('.auth-nav');
+    const appNavItems = document.querySelectorAll('.app-nav');
+    
+    authNavItems.forEach(item => item.style.display = 'block');
+    appNavItems.forEach(item => item.style.display = 'none');
+}
+
+/**
+ * Show/hide loading overlay
+ */
+function showLoadingOverlay() {
+    if (loadingOverlay) loadingOverlay.style.display = 'flex';
+}
+
+function hideLoadingOverlay() {
+    if (loadingOverlay) loadingOverlay.style.display = 'none';
+}
+
+/**
+ * Show/hide error messages
+ */
+function showLoginError(message) {
+    if (loginError) {
+        loginError.textContent = message;
+        loginError.style.display = 'block';
+    }
+}
+
+function hideLoginError() {
+    if (loginError) loginError.style.display = 'none';
+}
+
+function showSignupError(message) {
+    if (signupError) {
+        signupError.textContent = message;
+        signupError.style.display = 'block';
+    }
+}
+
+function hideSignupError() {
+    if (signupError) signupError.style.display = 'none';
+}
+
+function showSuccessMessage(message) {
+    // Show success in login error div with success styling
+    if (loginError) {
+        loginError.textContent = message;
+        loginError.className = 'alert alert-success mt-3';
+        loginError.style.display = 'block';
+        
+        // Reset to error styling after 5 seconds
+        setTimeout(() => {
+            loginError.className = 'alert alert-danger mt-3';
+            hideLoginError();
+        }, 5000);
+    }
+}
+
+// =========================
+// BIRD IDENTIFICATION FUNCTIONS (Original functionality)
+// =========================
+
 /**
  * Hide all result sections
  */
 function hideAllSections() {
-    previewSection.style.display = 'none';
-    loadingSection.style.display = 'none';
-    resultsSection.style.display = 'none';
-    errorSection.style.display = 'none';
+    if (previewSection) previewSection.style.display = 'none';
+    if (loadingSection) loadingSection.style.display = 'none';
+    if (resultsSection) resultsSection.style.display = 'none';
+    if (errorSection) errorSection.style.display = 'none';
 }
 
 /**
@@ -75,7 +426,7 @@ function handleFileSelect(event) {
 function handleDragOver(event) {
     event.preventDefault();
     event.stopPropagation();
-    uploadArea.classList.add('dragover');
+    if (uploadArea) uploadArea.classList.add('dragover');
 }
 
 /**
@@ -84,7 +435,7 @@ function handleDragOver(event) {
 function handleDragLeave(event) {
     event.preventDefault();
     event.stopPropagation();
-    uploadArea.classList.remove('dragover');
+    if (uploadArea) uploadArea.classList.remove('dragover');
 }
 
 /**
@@ -93,7 +444,7 @@ function handleDragLeave(event) {
 function handleDrop(event) {
     event.preventDefault();
     event.stopPropagation();
-    uploadArea.classList.remove('dragover');
+    if (uploadArea) uploadArea.classList.remove('dragover');
 
     const files = event.dataTransfer.files;
     if (files.length > 0) {
@@ -125,12 +476,14 @@ function validateAndPreviewFile(file) {
     // Store selected file
     selectedFile = file;
 
-    // Show preview
+    // Create preview
     const reader = new FileReader();
     reader.onload = function(e) {
-        previewImage.src = e.target.result;
-        previewSection.style.display = 'block';
-        previewSection.classList.add('fade-in');
+        if (previewImage) {
+            previewImage.src = e.target.result;
+            previewImage.alt = file.name;
+        }
+        if (previewSection) previewSection.style.display = 'block';
     };
     reader.readAsDataURL(file);
 }
@@ -139,15 +492,17 @@ function validateAndPreviewFile(file) {
  * Identify bird species
  */
 async function identifyBird() {
-    if (!selectedFile || isUploading) {
+    if (!selectedFile) {
+        showError('Please select an image first.');
         return;
     }
 
-    isUploading = true;
+    // Show loading state
     hideAllSections();
-    loadingSection.style.display = 'block';
-    loadingSection.classList.add('fade-in');
+    if (loadingSection) loadingSection.style.display = 'block';
+    isUploading = true;
 
+    // Prepare form data
     const formData = new FormData();
     formData.append('image', selectedFile);
 
@@ -157,75 +512,108 @@ async function identifyBird() {
             body: formData
         });
 
-        const result = await response.json();
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
 
-        if (result.success) {
-            showResults(result.data);
+        const data = await response.json();
+
+        if (data.success) {
+            displayResults(data);
         } else {
-            showError(result.message || 'Failed to identify bird species. Please try again.');
+            showError(data.message || 'Identification failed. Please try again.');
         }
     } catch (error) {
-        console.error('Error identifying bird:', error);
+        console.error('Identification error:', error);
         showError('Network error occurred. Please check your connection and try again.');
     } finally {
+        hideLoadingState();
         isUploading = false;
-        loadingSection.style.display = 'none';
     }
 }
 
 /**
- * Show identification results
+ * Display identification results
  */
-function showResults(data) {
-    const { species, confidence, description, characteristics } = data;
+function displayResults(data) {
+    if (!resultsContent) return;
     
+    const species = data.species_info;
+    const confidence = data.confidence || 95;
+    
+    // Create results HTML
     const resultsHTML = `
-        <div class="result-item mb-3">
-            <div class="d-flex justify-content-between align-items-center mb-2">
-                <h6 class="mb-0 fw-bold">${species}</h6>
-                <span class="badge bg-success">${confidence}% confidence</span>
+        <div class="row">
+            <div class="col-md-4 text-center mb-3">
+                <img src="images/${species.name.toLowerCase().replace(/\s+/g, '-')}.svg" 
+                     alt="${species.name}" 
+                     class="img-fluid" 
+                     style="max-height: 200px;">
             </div>
-            <div class="confidence-bar">
-                <div class="confidence-fill" style="width: ${confidence}%"></div>
+            <div class="col-md-8">
+                <h4 class="text-primary">${species.name}</h4>
+                <p class="text-muted"><em>${species.scientific_name}</em></p>
+                <div class="mb-3">
+                    <div class="d-flex align-items-center mb-2">
+                        <strong class="me-2">Confidence:</strong>
+                        <div class="progress flex-grow-1 me-2" style="height: 20px;">
+                            <div class="progress-bar bg-success" 
+                                 style="width: ${confidence}%"
+                                 aria-valuenow="${confidence}" 
+                                 aria-valuemin="0" 
+                                 aria-valuemax="100">
+                            </div>
+                        </div>
+                        <span class="badge bg-success">${confidence}%</span>
+                    </div>
+                </div>
+                <p><strong>Description:</strong> ${species.description}</p>
+                <p><strong>Habitat:</strong> ${species.habitat}</p>
+                <p><strong>Diet:</strong> ${species.diet}</p>
+                <p><strong>Behavior:</strong> ${species.behavior}</p>
+                <p><strong>Conservation Status:</strong> 
+                   <span class="badge bg-info">${species.conservation_status}</span>
+                </p>
             </div>
         </div>
         
-        ${description ? `
-            <div class="mt-3">
-                <h6 class="fw-bold">Description:</h6>
-                <p class="mb-2">${description}</p>
-            </div>
-        ` : ''}
+        <div class="mt-4">
+            <h5>Key Characteristics:</h5>
+            <ul class="list-unstyled">
+                ${species.characteristics.map(char => `<li><i class="fas fa-check text-success me-2"></i>${char}</li>`).join('')}
+            </ul>
+        </div>
         
-        ${characteristics && characteristics.length > 0 ? `
-            <div class="mt-3">
-                <h6 class="fw-bold">Key Characteristics:</h6>
-                <ul class="list-unstyled">
-                    ${characteristics.map(char => `<li><i class="fas fa-check text-success me-2"></i>${char}</li>`).join('')}
-                </ul>
-            </div>
-        ` : ''}
-        
-        <div class="mt-3">
-            <a href="species.php?species=${encodeURIComponent(species)}" class="btn btn-outline-primary btn-sm">
-                <i class="fas fa-info-circle me-1"></i>
-                Learn More
+        <div class="mt-4 text-center">
+            <button class="btn btn-primary me-2" onclick="resetUpload()">
+                <i class="fas fa-plus me-2"></i>
+                Identify Another Bird
+            </button>
+            <a href="species.php" class="btn btn-outline-primary">
+                <i class="fas fa-info-circle me-2"></i>
+                Learn More About Birds
             </a>
         </div>
     `;
-
+    
     resultsContent.innerHTML = resultsHTML;
-    resultsSection.style.display = 'block';
-    resultsSection.classList.add('slide-up');
+    if (resultsSection) resultsSection.style.display = 'block';
 }
 
 /**
  * Show error message
  */
 function showError(message) {
-    errorContent.innerHTML = `<p class="mb-0">${message}</p>`;
-    errorSection.style.display = 'block';
-    errorSection.classList.add('fade-in');
+    hideAllSections();
+    if (errorContent) errorContent.textContent = message;
+    if (errorSection) errorSection.style.display = 'block';
+}
+
+/**
+ * Hide loading state
+ */
+function hideLoadingState() {
+    if (loadingSection) loadingSection.style.display = 'none';
 }
 
 /**
@@ -233,20 +621,30 @@ function showError(message) {
  */
 function resetUpload() {
     selectedFile = null;
-    imageInput.value = '';
-    previewImage.src = '';
-    uploadArea.classList.remove('dragover');
+    isUploading = false;
+    
+    if (imageInput) imageInput.value = '';
+    if (previewImage) {
+        previewImage.src = '';
+        previewImage.alt = '';
+    }
+    
     hideAllSections();
+    
+    if (uploadArea) uploadArea.classList.remove('dragover');
 }
 
 /**
  * Scroll to upload section
  */
 function scrollToUpload() {
-    document.getElementById('upload-section').scrollIntoView({
-        behavior: 'smooth',
-        block: 'start'
-    });
+    const uploadSection = document.getElementById('upload-section');
+    if (uploadSection) {
+        uploadSection.scrollIntoView({ 
+            behavior: 'smooth',
+            block: 'start'
+        });
+    }
 }
 
 /**
@@ -261,31 +659,19 @@ function formatFileSize(bytes) {
 }
 
 /**
- * Show loading state for any element
+ * Debounce function for performance optimization
  */
-function showLoading(element, text = 'Loading...') {
-    element.innerHTML = `
-        <div class="d-flex align-items-center justify-content-center">
-            <div class="spinner-border spinner-border-sm me-2" role="status">
-                <span class="visually-hidden">Loading...</span>
-            </div>
-            ${text}
-        </div>
-    `;
-}
-
-/**
- * Utility function to debounce function calls
- */
-function debounce(func, wait) {
+function debounce(func, wait, immediate) {
     let timeout;
     return function executedFunction(...args) {
         const later = () => {
-            clearTimeout(timeout);
-            func(...args);
+            timeout = null;
+            if (!immediate) func(...args);
         };
+        const callNow = immediate && !timeout;
         clearTimeout(timeout);
         timeout = setTimeout(later, wait);
+        if (callNow) func(...args);
     };
 }
 
@@ -294,6 +680,12 @@ window.MKfinder = {
     scrollToUpload,
     resetUpload,
     formatFileSize,
-    showLoading,
-    debounce
+    showLoadingOverlay,
+    hideLoadingOverlay,
+    debounce,
+    showWelcome,
+    showLoginForm,
+    showSignupForm,
+    handleLogout,
+    showMainApp
 };
