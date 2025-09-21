@@ -153,7 +153,23 @@ function identifyBirdSpecies($imagePath) {
         }
 
         // Fallback: Return demo identification result
-        return getDemoIdentificationResult();
+        $supportedSpecies = ['American Robin', 'Blue Jay', 'Northern Cardinal'];
+        $randomSpecies = $supportedSpecies[array_rand($supportedSpecies)];
+        $randomConfidence = rand(80, 99); // Generate random confidence between 80-99%
+        
+        $speciesInfo = getDefaultSpeciesInfo($randomSpecies);
+        
+        return [
+            'success' => true,
+            'data' => [
+                'species' => $randomSpecies,
+                'confidence' => $randomConfidence,
+                'description' => $speciesInfo['description'] ?? '',
+                'characteristics' => $speciesInfo['characteristics'] ?? [],
+                'habitat' => $speciesInfo['habitat'] ?? '',
+                'scientific_name' => $speciesInfo['scientific_name'] ?? ''
+            ]
+        ];
 
     } catch (Exception $e) {
         logError('Error in identifyBirdSpecies', [
@@ -289,29 +305,6 @@ function getSpeciesInfo($speciesName) {
 
     // Return default information if not found in database
     return getDefaultSpeciesInfo($speciesName);
-}
-
-/**
- * Get demo identification result (randomly selects from supported species)
- */
-function getDemoIdentificationResult() {
-    $supportedSpecies = ['American Robin', 'Blue Jay', 'Northern Cardinal'];
-    $randomSpecies = $supportedSpecies[array_rand($supportedSpecies)];
-    $randomConfidence = rand(80, 99); // Generate random confidence between 80-99%
-    
-    $speciesInfo = getDefaultSpeciesInfo($randomSpecies);
-    
-    return [
-        'success' => true,
-        'data' => [
-            'species' => $randomSpecies,
-            'confidence' => $randomConfidence,
-            'description' => $speciesInfo['description'] ?? '',
-            'characteristics' => $speciesInfo['characteristics'] ?? [],
-            'habitat' => $speciesInfo['habitat'] ?? '',
-            'scientific_name' => $speciesInfo['scientific_name'] ?? ''
-        ]
-    ];
 }
 
 /**
