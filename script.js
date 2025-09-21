@@ -262,7 +262,9 @@ async function handleLogout() {
  * Show authentication section
  */
 function showAuthSection() {
-    if (authSection) authSection.style.display = 'block';
+    document.body.classList.add('auth-active');
+    document.body.classList.remove('app-active');
+    if (authSection) authSection.style.display = 'flex';
     if (mainApp) mainApp.style.display = 'none';
     showWelcome();
 }
@@ -271,9 +273,14 @@ function showAuthSection() {
  * Show main application
  */
 function showMainApp() {
+    document.body.classList.add('app-active');
+    document.body.classList.remove('auth-active');
     if (authSection) authSection.style.display = 'none';
     if (mainApp) mainApp.style.display = 'block';
     hideAllSections();
+    
+    // Scroll to top after showing main app
+    window.scrollTo(0, 0);
 }
 
 /**
