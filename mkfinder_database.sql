@@ -5,6 +5,20 @@
 CREATE DATABASE IF NOT EXISTS mkfinder CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE mkfinder;
 
+-- Create users table for authentication
+CREATE TABLE IF NOT EXISTS users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id VARCHAR(50) NOT NULL UNIQUE,
+    email VARCHAR(255) NOT NULL UNIQUE,
+    phone VARCHAR(20) NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    status ENUM('active', 'inactive', 'suspended') DEFAULT 'active',
+    INDEX idx_user_email (email),
+    INDEX idx_user_id (user_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- Create species table
 CREATE TABLE IF NOT EXISTS species (
     id INT AUTO_INCREMENT PRIMARY KEY,
