@@ -10,6 +10,15 @@ require_once 'database.php';
 // Initialize session for CSRF protection
 initSession();
 
+// Check if user is authenticated
+if (!isLoggedIn()) {
+    sendJSONResponse([
+        'success' => false,
+        'message' => 'Authentication required. Please log in to upload images.',
+        'error_code' => 'AUTH_REQUIRED'
+    ], 401);
+}
+
 // Set headers
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
