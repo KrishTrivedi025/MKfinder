@@ -38,14 +38,18 @@ document.addEventListener('DOMContentLoaded', function() {
  * Initialize the application
  */
 async function initializeApp() {
+    console.log('initializeApp called');
+    
     initializeEventListeners();
+    
+    // Always show main app on load (open website)
+    showMainAppPublic();
     hideAllSections();
     
-    // Check if user is already authenticated (but show main app regardless)
+    // Check if user is already authenticated (but keep main app visible)
     await checkAuthStatus();
     
-    // Always show main app on load
-    showMainAppPublic();
+    console.log('initializeApp completed');
 }
 
 /**
@@ -286,10 +290,33 @@ function hideAuthModal() {
  * Show main application (always visible for public access)
  */
 function showMainAppPublic() {
-    if (authSection) authSection.style.display = 'none';
-    if (mainApp) mainApp.style.display = 'block';
+    console.log('showMainAppPublic called');
+    
+    // Explicitly hide auth section with force
+    const authEl = document.getElementById('auth-section');
+    if (authEl) {
+        authEl.style.setProperty('display', 'none', 'important');
+        authEl.style.setProperty('visibility', 'hidden', 'important');
+        authEl.style.setProperty('opacity', '0', 'important');
+        authEl.style.setProperty('pointer-events', 'none', 'important');
+        console.log('Auth section forcefully hidden');
+    }
+    
+    // Explicitly show main app
+    const mainAppEl = document.getElementById('main-app');
+    if (mainAppEl) {
+        mainAppEl.style.display = 'block';
+        console.log('Main app shown');
+    }
+    
+    // Hide upload sections initially
     hideAllSections();
+    
+    // Ensure body scrolling is enabled
     document.body.style.overflow = 'auto';
+    
+    // Remove any modal backdrop
+    document.body.classList.remove('modal-open');
 }
 
 /**
