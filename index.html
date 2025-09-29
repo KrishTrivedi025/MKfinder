@@ -21,37 +21,40 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto" id="navLinks">
-                    <!-- Authentication Navigation (shown when not logged in) -->
-                    <li class="nav-item auth-nav">
-                        <a class="nav-link" href="login.html">Login</a>
+                    <!-- Always visible navigation -->
+                    <li class="nav-item">
+                        <a class="nav-link active" href="index.html">Home</a>
                     </li>
-                    <li class="nav-item auth-nav">
-                        <a class="nav-link" href="signup.html">Sign Up</a>
-                    </li>
-                    
-                    <!-- Main App Navigation (shown when logged in) -->
-                    <li class="nav-item app-nav" style="display: none;">
-                        <a class="nav-link active" href="#" onclick="showMainApp()">Home</a>
-                    </li>
-                    <li class="nav-item app-nav" style="display: none;">
+                    <li class="nav-item">
                         <a class="nav-link" href="gallery.php">Gallery</a>
                     </li>
-                    <li class="nav-item app-nav" style="display: none;">
+                    <li class="nav-item">
                         <a class="nav-link" href="species.php">Species Info</a>
                     </li>
-                    <li class="nav-item app-nav" style="display: none;">
+                    
+                    <!-- Authentication Navigation (shown when not logged in) -->
+                    <li class="nav-item guest-nav">
+                        <a class="nav-link" href="#" onclick="showLoginModal(); return false;">Login</a>
+                    </li>
+                    <li class="nav-item guest-nav">
+                        <a class="nav-link" href="#" onclick="showSignupModal(); return false;">Sign Up</a>
+                    </li>
+                    
+                    <!-- User info (shown when logged in) -->
+                    <li class="nav-item user-nav" style="display: none;">
                         <span class="nav-link text-white-50" id="userEmail"></span>
                     </li>
-                    <li class="nav-item app-nav" style="display: none;">
-                        <a class="nav-link" href="#" onclick="handleLogout()">Logout</a>
+                    <li class="nav-item user-nav" style="display: none;">
+                        <a class="nav-link" href="#" onclick="handleLogout(); return false;">Logout</a>
                     </li>
                 </ul>
             </div>
         </div>
     </nav>
 
-    <!-- Authentication Section -->
-    <section id="auth-section" class="min-vh-100 d-flex align-items-center bg-primary">
+    <!-- Authentication Section (Hidden by default, shown as modal) -->
+    <section id="auth-section" class="min-vh-100 d-flex align-items-center bg-primary" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 9999; background: rgba(44, 85, 48, 0.95);">
+        <button onclick="hideAuthModal()" style="position: absolute; top: 20px; right: 20px; background: white; border: none; border-radius: 50%; width: 40px; height: 40px; cursor: pointer; font-size: 24px; line-height: 1; z-index: 10000;">&times;</button>
         <div class="container">
             <div class="row justify-content-center">
                 <div class="col-lg-5">
@@ -106,9 +109,9 @@
                                         <i class="fas fa-sign-in-alt me-2"></i>
                                         Login
                                     </button>
-                                    <button type="button" class="btn btn-outline-secondary" onclick="showWelcome()">
-                                        <i class="fas fa-arrow-left me-2"></i>
-                                        Back
+                                    <button type="button" class="btn btn-outline-secondary" onclick="hideAuthModal()">
+                                        <i class="fas fa-times me-2"></i>
+                                        Cancel
                                     </button>
                                 </div>
                             </form>
@@ -152,9 +155,9 @@
                                         <i class="fas fa-user-plus me-2"></i>
                                         Create Account
                                     </button>
-                                    <button type="button" class="btn btn-outline-secondary" onclick="showWelcome()">
-                                        <i class="fas fa-arrow-left me-2"></i>
-                                        Back
+                                    <button type="button" class="btn btn-outline-secondary" onclick="hideAuthModal()">
+                                        <i class="fas fa-times me-2"></i>
+                                        Cancel
                                     </button>
                                 </div>
                             </form>
@@ -167,7 +170,7 @@
     </section>
 
     <!-- Main Application Section -->
-    <section id="main-app" style="display: none;">
+    <section id="main-app">
         <!-- Hero Section -->
         <section class="hero-section">
             <div class="container">

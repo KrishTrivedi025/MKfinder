@@ -41,8 +41,11 @@ async function initializeApp() {
     initializeEventListeners();
     hideAllSections();
     
-    // Check if user is already authenticated
+    // Check if user is already authenticated (but show main app regardless)
     await checkAuthStatus();
+    
+    // Always show main app on load
+    showMainAppPublic();
 }
 
 /**
@@ -105,16 +108,14 @@ async function checkAuthStatus() {
         
         if (data.success && data.authenticated) {
             currentUser = data.user;
-            showMainApp();
             updateNavigationForLoggedInUser();
         } else {
             currentUser = null;
-            showAuthSection();
             updateNavigationForGuestUser();
         }
     } catch (error) {
         console.error('Error checking auth status:', error);
-        showAuthSection();
+        currentUser = null;
         updateNavigationForGuestUser();
     }
 }
@@ -152,9 +153,11 @@ async function handleLogin(event) {
         
         if (data.success) {
             currentUser = data.user;
-            showMainApp();
             updateNavigationForLoggedInUser();
+            hideAuthModal();
             loginForm.reset();
+            // Show success message
+            alert('Login successful! You can now upload bird images.');
         } else {
             showLoginError(data.message || 'Login failed');
         }
@@ -214,9 +217,9 @@ async function handleSignup(event) {
         
         if (data.success) {
             // Registration successful, show login form
+            signupForm.reset();
             showLoginForm();
             showSuccessMessage('Account created successfully! Please login with your new credentials.');
-            signupForm.reset();
         } else {
             showSignupError(data.message || 'Registration failed');
         }
@@ -243,9 +246,10 @@ async function handleLogout() {
         
         if (data.success) {
             currentUser = null;
-            showAuthSection();
             updateNavigationForGuestUser();
+            hideAuthModal();
             resetUpload();
+            alert('Logged out successfully!');
         }
     } catch (error) {
         console.error('Logout error:', error);
@@ -259,27 +263,42 @@ async function handleLogout() {
 // =========================
 
 /**
- * Show authentication section
+ * Show authentication modal
  */
-function showAuthSection() {
-    document.body.classList.add('auth-active');
-    document.body.classList.remove('app-active');
-    if (authSection) authSection.style.display = 'flex';
-    if (mainApp) mainApp.style.display = 'none';
-    showWelcome();
+function showAuthModal() {
+    if (authSection) {
+        authSection.style.display = 'flex';
+        document.body.style.overflow = 'hidden'; // Prevent scrolling
+    }
 }
 
 /**
- * Show main application
+ * Hide authentication modal
  */
-function showMainApp() {
-    document.body.classList.add('app-active');
-    document.body.classList.remove('auth-active');
+function hideAuthModal() {
+    if (authSection) {
+        authSection.style.display = 'none';
+        document.body.style.overflow = 'auto'; // Restore scrolling
+    }
+}
+
+/**
+ * Show main application (always visible for public access)
+ */
+function showMainAppPublic() {
     if (authSection) authSection.style.display = 'none';
     if (mainApp) mainApp.style.display = 'block';
     hideAllSections();
-    
-    // Scroll to top after showing main app
+    document.body.style.overflow = 'auto';
+}
+
+/**
+ * Show main application after login
+ */
+function showMainApp() {
+    hideAuthModal();
+    if (mainApp) mainApp.style.display = 'block';
+    hideAllSections();
     window.scrollTo(0, 0);
 }
 
@@ -295,9 +314,26 @@ function showWelcome() {
 }
 
 /**
+ * Show login modal
+ */
+function showLoginModal() {
+    showAuthModal();
+    showLoginForm();
+}
+
+/**
+ * Show signup modal
+ */
+function showSignupModal() {
+    showAuthModal();
+    showSignupForm();
+}
+
+/**
  * Show login form
  */
 function showLoginForm() {
+    showAuthModal();
     if (welcomeCard) welcomeCard.style.display = 'none';
     if (loginCard) loginCard.style.display = 'block';
     if (signupCard) signupCard.style.display = 'none';
@@ -314,6 +350,7 @@ function showLoginForm() {
  * Show signup form
  */
 function showSignupForm() {
+    showAuthModal();
     if (welcomeCard) welcomeCard.style.display = 'none';
     if (loginCard) loginCard.style.display = 'none';
     if (signupCard) signupCard.style.display = 'block';
@@ -330,11 +367,11 @@ function showSignupForm() {
  * Update navigation for logged in user
  */
 function updateNavigationForLoggedInUser() {
-    const authNavItems = document.querySelectorAll('.auth-nav');
-    const appNavItems = document.querySelectorAll('.app-nav');
+    const guestNavItems = document.querySelectorAll('.guest-nav');
+    const userNavItems = document.querySelectorAll('.user-nav');
     
-    authNavItems.forEach(item => item.style.display = 'none');
-    appNavItems.forEach(item => item.style.display = 'block');
+    guestNavItems.forEach(item => item.style.display = 'none');
+    userNavItems.forEach(item => item.style.display = 'block');
     
     if (userEmail && currentUser) {
         userEmail.textContent = currentUser.email;
@@ -345,11 +382,11 @@ function updateNavigationForLoggedInUser() {
  * Update navigation for guest user
  */
 function updateNavigationForGuestUser() {
-    const authNavItems = document.querySelectorAll('.auth-nav');
-    const appNavItems = document.querySelectorAll('.app-nav');
+    const guestNavItems = document.querySelectorAll('.guest-nav');
+    const userNavItems = document.querySelectorAll('.user-nav');
     
-    authNavItems.forEach(item => item.style.display = 'block');
-    appNavItems.forEach(item => item.style.display = 'none');
+    guestNavItems.forEach(item => item.style.display = 'block');
+    userNavItems.forEach(item => item.style.display = 'none');
 }
 
 /**
@@ -463,6 +500,12 @@ function handleDrop(event) {
  * Validate file and show preview
  */
 function validateAndPreviewFile(file) {
+    // Check if user is logged in
+    if (!currentUser) {
+        showLoginRequiredAlert();
+        return;
+    }
+    
     // Reset previous states
     hideAllSections();
     
@@ -493,6 +536,16 @@ function validateAndPreviewFile(file) {
         if (previewSection) previewSection.style.display = 'block';
     };
     reader.readAsDataURL(file);
+}
+
+/**
+ * Show login required alert
+ */
+function showLoginRequiredAlert() {
+    const shouldLogin = confirm('You must be logged in to upload images for bird identification.\n\nWould you like to login now?');
+    if (shouldLogin) {
+        showLoginModal();
+    }
 }
 
 /**
@@ -693,6 +746,9 @@ window.MKfinder = {
     showWelcome,
     showLoginForm,
     showSignupForm,
+    showLoginModal,
+    showSignupModal,
     handleLogout,
-    showMainApp
+    showMainApp,
+    showMainAppPublic
 };
