@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - MKfinder</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="styles.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 20px 0;
+        }
+        
+        .auth-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            padding: 40px 35px;
+            width: 100%;
+            max-width: 420px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .auth-logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 25px;
+        }
+        
+        .logo-mk {
+            background: #4CAF50;
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 18px;
+            margin-right: 10px;
+        }
+        
+        .brand-name {
+            font-size: 28px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .auth-title {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 30px;
+            font-size: 24px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .auth-title i {
+            margin-right: 10px;
+            color: #4CAF50;
+        }
+        
+        .form-label {
+            font-weight: 500;
+            color: #555;
+            margin-bottom: 8px;
+        }
+        
+        .form-control {
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 12px 15px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            margin-bottom: 5px;
+        }
+        
+        .form-control:focus {
+            border-color: #4CAF50;
+            box-shadow: 0 0 0 0.2rem rgba(76, 175, 80, 0.25);
+        }
+        
+        .form-text {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 15px;
+            margin-top: 5px;
+        }
+        
+        .btn-auth {
+            background: #4CAF50;
+            border: none;
+            border-radius: 10px;
+            padding: 12px 25px;
+            font-size: 16px;
+            font-weight: 600;
+            color: white;
+            width: 100%;
+            transition: all 0.3s ease;
+            margin-bottom: 15px;
+            margin-top: 10px;
+        }
+        
+        .btn-auth:hover {
+            background: #45a049;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+        }
+        
+        .btn-back {
+            background: transparent;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 12px 25px;
+            font-size: 16px;
+            font-weight: 500;
+            color: #666;
+            width: 100%;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-back:hover {
+            border-color: #4CAF50;
+            color: #4CAF50;
+            background: rgba(76, 175, 80, 0.05);
+        }
+        
+        .error-message {
+            background: #ffebee;
+            border: 1px solid #ef5350;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 20px;
+            color: #c62828;
+            font-size: 14px;
+            display: none;
+        }
+        
+        .success-message {
+            background: #e8f5e8;
+            border: 1px solid #4CAF50;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 20px;
+            color: #2e7d32;
+            font-size: 14px;
+            display: none;
+        }
+        
+        .login-link {
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .login-link a {
+            color: #4CAF50;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .login-link a:hover {
+            text-decoration: underline;
+        }
+        
+        .mb-3 {
+            margin-bottom: 18px !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-container">
+        <div class="auth-logo">
+            <div class="logo-mk">MK</div>
+            <span class="brand-name">finder</span>
+        </div>
+        
+        <div class="auth-title">
+            <i class="fas fa-user-plus"></i>
+            Create Account
+        </div>
+        
+        <form id="signupForm">
+            <div id="errorMessage" class="error-message"></div>
+            <div id="successMessage" class="success-message"></div>
+            
+            <div class="mb-3">
+                <label for="email" class="form-label">Email Address</label>
+                <input type="email" class="form-control" id="email" name="email" required 
+                       placeholder="Enter your email address">
+            </div>
+            
+            <div class="mb-3">
+                <label for="phone" class="form-label">Phone Number</label>
+                <input type="tel" class="form-control" id="phone" name="phone" required 
+                       placeholder="+1234567890">
+            </div>
+            
+            <div class="mb-3">
+                <label for="password" class="form-label">Password</label>
+                <input type="password" class="form-control" id="password" name="password" required 
+                       placeholder="Create a password" minlength="6">
+                <div class="form-text">Password must be at least 6 characters long</div>
+            </div>
+            
+            <div class="mb-3">
+                <label for="confirmPassword" class="form-label">Confirm Password</label>
+                <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" required 
+                       placeholder="Confirm your password">
+            </div>
+            
+            <button type="submit" class="btn btn-auth" id="signupBtn">
+                <i class="fas fa-user-plus me-2"></i>
+                Create Account
+            </button>
+            
+            <button type="button" class="btn btn-back" onclick="goBack()">
+                <i class="fas fa-arrow-left me-2"></i>
+                Back
+            </button>
+            
+            <div class="login-link">
+                Already have an account? <a href="login.html">Login here</a>
+            </div>
+        </form>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.getElementById('signupForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const phone = document.getElementById('phone').value;
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const signupBtn = document.getElementById('signupBtn');
+            const errorMessage = document.getElementById('errorMessage');
+            const successMessage = document.getElementById('successMessage');
+            
+            // Hide previous messages
+            errorMessage.style.display = 'none';
+            successMessage.style.display = 'none';
+            
+            // Validate passwords match
+            if (password !== confirmPassword) {
+                errorMessage.textContent = 'Passwords do not match.';
+                errorMessage.style.display = 'block';
+                return;
+            }
+            
+            // Validate password length
+            if (password.length < 6) {
+                errorMessage.textContent = 'Password must be at least 6 characters long.';
+                errorMessage.style.display = 'block';
+                return;
+            }
+            
+            // Show loading state
+            signupBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Creating Account...';
+            signupBtn.disabled = true;
+            
+            try {
+                const response = await fetch('auth.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `action=signup&email=${encodeURIComponent(email)}&phone=${encodeURIComponent(phone)}&password=${encodeURIComponent(password)}`
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    successMessage.textContent = 'Account created successfully! Redirecting to login...';
+                    successMessage.style.display = 'block';
+                    
+                    // Redirect to login page after success
+                    setTimeout(() => {
+                        window.location.href = 'login.html';
+                    }, 2000);
+                } else {
+                    errorMessage.textContent = data.message || 'Signup failed. Please try again.';
+                    errorMessage.style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Signup error:', error);
+                errorMessage.textContent = 'An error occurred. Please try again.';
+                errorMessage.style.display = 'block';
+            } finally {
+                // Reset button state
+                signupBtn.innerHTML = '<i class="fas fa-user-plus me-2"></i>Create Account';
+                signupBtn.disabled = false;
+            }
+        });
+        
+        function goBack() {
+            window.location.href = 'index.html';
+        }
+        
+        // Auto-focus email field
+        document.getElementById('email').focus();
+        
+        // Real-time password confirmation validation
+        document.getElementById('confirmPassword').addEventListener('input', function() {
+            const password = document.getElementById('password').value;
+            const confirmPassword = this.value;
+            
+            if (confirmPassword && password !== confirmPassword) {
+                this.style.borderColor = '#ef5350';
+            } else {
+                this.style.borderColor = '#e0e0e0';
+            }
+        });
+    </script>
+</body>
+</html>
