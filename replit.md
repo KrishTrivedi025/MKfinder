@@ -122,6 +122,24 @@ The architecture supports easy migration to:
 
 ## Recent Changes
 
+### September 29, 2025 - Open Website Architecture
+- **Transformed from Login-Required to Open Access Model**
+  - Home page now displays immediately without requiring login
+  - Users can browse species information and gallery without authentication
+  - Authentication only required when attempting to upload images for identification
+  
+- **Enhanced Navigation and User Experience**
+  - Login and Signup links always visible in navigation bar
+  - Modal-based authentication system (overlay instead of full-page)
+  - Smooth transitions between guest and authenticated states
+  - Login prompt with confirmation dialog when non-authenticated users try to upload
+  
+- **Improved Authentication Flow**
+  - Streamlined modal interface for login/signup with close button
+  - Better visual feedback for authentication states
+  - Session-based authentication with automatic status checking
+  - Proper navigation updates based on user login status
+
 ### July 22, 2025 - Database Integration
 - **Migrated from JSON file storage to PostgreSQL database**
   - Created proper database schema with optimized tables and indexes
