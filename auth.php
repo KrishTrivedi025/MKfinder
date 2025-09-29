@@ -65,7 +65,13 @@ function handleSignup() {
         sendJSONResponse(['success' => false, 'message' => 'Invalid request method'], 405);
     }
     
-    $input = json_decode(file_get_contents('php://input'), true);
+    // Handle both JSON and form data
+    $input = null;
+    if (isset($_POST['email'])) {
+        $input = $_POST;
+    } else {
+        $input = json_decode(file_get_contents('php://input'), true);
+    }
     
     $email = trim($input['email'] ?? '');
     $phone = trim($input['phone'] ?? '');
@@ -139,7 +145,13 @@ function handleLogin() {
         sendJSONResponse(['success' => false, 'message' => 'Invalid request method'], 405);
     }
     
-    $input = json_decode(file_get_contents('php://input'), true);
+    // Handle both JSON and form data
+    $input = null;
+    if (isset($_POST['email'])) {
+        $input = $_POST;
+    } else {
+        $input = json_decode(file_get_contents('php://input'), true);
+    }
     
     $email = trim($input['email'] ?? '');
     $password = $input['password'] ?? '';
@@ -276,8 +288,10 @@ function getCurrentUser() {
 // Note: sendJSONResponse and logError functions are imported from config.php
 
 // Handle different actions
-if (isset($_GET['action'])) {
-    switch ($_GET['action']) {
+$action = $_GET['action'] ?? $_POST['action'] ?? null;
+
+if ($action) {
+    switch ($action) {
         case 'signup':
             handleSignup();
             break;
