@@ -25,30 +25,37 @@ class Database {
     }
     
     /**
-     * Connect to PostgreSQL database
+     * Connect to MySQL database
      */
     private function connect() {
         try {
+            // Try DATABASE_URL first (for production/cloud environments)
             $databaseUrl = getenv('DATABASE_URL');
             
-            if (empty($databaseUrl)) {
-                throw new Exception('DATABASE_URL environment variable not set');
+            if (!empty($databaseUrl)) {
+                // Parse DATABASE_URL
+                $dbInfo = parse_url($databaseUrl);
+                $host = $dbInfo['host'];
+                $port = $dbInfo['port'] ?? 3306;
+                $dbname = ltrim($dbInfo['path'], '/');
+                $user = $dbInfo['user'];
+                $password = $dbInfo['pass'];
+            } else {
+                // Fallback to individual environment variables or defaults for local development
+                $host = getenv('DB_HOST') ?: 'localhost';
+                $port = getenv('DB_PORT') ?: 3306;
+                $dbname = getenv('DB_NAME') ?: 'mkfinder';
+                $user = getenv('DB_USER') ?: 'root';
+                $password = getenv('DB_PASS') ?: '';
             }
             
-            // Parse DATABASE_URL
-            $dbInfo = parse_url($databaseUrl);
-            $host = $dbInfo['host'];
-            $port = $dbInfo['port'] ?? 5432;
-            $dbname = ltrim($dbInfo['path'], '/');
-            $user = $dbInfo['user'];
-            $password = $dbInfo['pass'];
-            
-            $dsn = "pgsql:host={$host};port={$port};dbname={$dbname}";
+            $dsn = "mysql:host={$host};port={$port};dbname={$dbname};charset=utf8mb4";
             
             $this->connection = new PDO($dsn, $user, $password, [
                 PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
                 PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-                PDO::ATTR_EMULATE_PREPARES => false
+                PDO::ATTR_EMULATE_PREPARES => false,
+                PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8mb4"
             ]);
             
         } catch (Exception $e) {
@@ -224,7 +231,7 @@ class Database {
 }
 
 /**
- * Get database instance
+ * Get database instance (wrapper for compatibility)
  */
 function getDatabase() {
     return Database::getInstance();
