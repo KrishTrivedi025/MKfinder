@@ -1,0 +1,9 @@
+[
+    {
+        "user_id": "user_demo_123",
+        "email": "demo@mkfinder.com",
+        "phone": "+1234567890",
+        "password_hash": "$2y$10$own4yCr3a2F.bki6rbyMG.I94CWfepMkehDdpoKZ.GEL9eoMMTIK6",
+        "created_at": "2025-09-30 05:46:58"
+    }
+]

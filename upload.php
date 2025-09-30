@@ -8,10 +8,10 @@ require_once 'config.php';
 require_once 'database.php';
 
 // Initialize session for CSRF protection
-initSession();
+session_start();
 
 // Check if user is authenticated
-if (!isLoggedIn()) {
+if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
     sendJSONResponse([
         'success' => false,
         'message' => 'Authentication required. Please log in to upload images.',

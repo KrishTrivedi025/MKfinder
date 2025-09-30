@@ -625,7 +625,7 @@ async function identifyBird() {
 function displayResults(data) {
     if (!resultsContent) return;
     
-    const species = data.species_info;
+    const species = data.species_info || data;
     const confidence = data.confidence || 95;
     
     // Create results HTML

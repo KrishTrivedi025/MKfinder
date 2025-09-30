@@ -11,7 +11,8 @@ require_once 'database.php';
 initSession();
 
 // Check if user is authenticated
-if (!isLoggedIn()) {
+session_start();
+if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
     sendJSONResponse([
         'success' => false,
         'message' => 'Authentication required. Please log in to identify birds.',
@@ -90,32 +91,42 @@ try {
         ], 400);
     }
 
-    // Store identification record
+    // Store identification record (simplified - no database)
     $identificationRecord = [
         'identification_id' => uniqid('id_', true),
         'filename' => $uniqueFilename,
         'original_name' => sanitizeInput($uploadedFile['name']),
         'species_name' => $identificationResult['data']['species'],
         'confidence' => $identificationResult['data']['confidence'],
-        'file_size' => $uploadedFile['size']
+        'file_size' => $uploadedFile['size'],
+        'identification_time' => date('Y-m-d H:i:s')
     ];
 
-    try {
-        $db = getDatabase();
-        $recordId = $db->saveIdentification($identificationRecord);
-        logError('Identification record saved successfully', ['record_id' => $recordId]);
-    } catch (Exception $e) {
-        logError('Failed to save identification record to database', [
-            'identification_record' => $identificationRecord,
-            'error' => $e->getMessage()
-        ]);
+    // Save to JSON file for demo mode
+    $recordsFile = __DIR__ . '/identifications.json';
+    $records = [];
+    if (file_exists($recordsFile)) {
+        $records = json_decode(file_get_contents($recordsFile), true) ?: [];
     }
+    $records[] = $identificationRecord;
+    file_put_contents($recordsFile, json_encode($records, JSON_PRETTY_PRINT));
 
-    // Return identification results
+    // Return identification results with full species info
     sendJSONResponse([
         'success' => true,
         'message' => 'Bird species identified successfully.',
-        'data' => $identificationResult['data']
+        'species' => $identificationResult['data']['species'],
+        'confidence' => $identificationResult['data']['confidence'],
+        'species_info' => [
+            'name' => $identificationResult['data']['species'],
+            'scientific_name' => $identificationResult['data']['scientific_name'],
+            'description' => $identificationResult['data']['description'],
+            'characteristics' => $identificationResult['data']['characteristics'],
+            'habitat' => $identificationResult['data']['habitat'],
+            'diet' => $identificationResult['data']['diet'] ?? 'Insects, seeds, and fruits',
+            'behavior' => $identificationResult['data']['behavior'] ?? 'Common songbird behavior',
+            'conservation_status' => 'Least Concern'
+        ]
     ]);
 
 } catch (Exception $e) {
@@ -164,7 +175,7 @@ function identifyBirdSpecies($imagePath) {
         // Fallback: Return demo identification result
         $supportedSpecies = ['American Robin', 'Blue Jay', 'Northern Cardinal'];
         $randomSpecies = $supportedSpecies[array_rand($supportedSpecies)];
-        $randomConfidence = rand(80, 99); // Generate random confidence between 80-99%
+        $randomConfidence = rand(85, 98); // Generate random confidence between 85-98%
         
         $speciesInfo = getDefaultSpeciesInfo($randomSpecies);
         
@@ -176,6 +187,8 @@ function identifyBirdSpecies($imagePath) {
                 'description' => $speciesInfo['description'] ?? '',
                 'characteristics' => $speciesInfo['characteristics'] ?? [],
                 'habitat' => $speciesInfo['habitat'] ?? '',
+                'diet' => $speciesInfo['diet'] ?? '',
+                'behavior' => $speciesInfo['behavior'] ?? '',
                 'scientific_name' => $speciesInfo['scientific_name'] ?? ''
             ]
         ];
@@ -332,7 +345,9 @@ function getDefaultSpeciesInfo($speciesName) {
                 'Yellow beak',
                 'White undertail coverts'
             ],
-            'habitat' => 'Woodlands, parks, gardens, and lawns'
+            'habitat' => 'Woodlands, parks, gardens, and lawns',
+            'diet' => 'Insects, earthworms, fruits, and berries',
+            'behavior' => 'Known for pulling earthworms from lawns, territorial during breeding season'
         ],
         'Blue Jay' => [
             'name' => 'Blue Jay',
@@ -345,7 +360,9 @@ function getDefaultSpeciesInfo($speciesName) {
                 'Prominent blue crest',
                 'White and black barred wings and tail'
             ],
-            'habitat' => 'Deciduous and mixed forests, parks, and residential areas'
+            'habitat' => 'Deciduous and mixed forests, parks, and residential areas',
+            'diet' => 'Nuts, seeds, insects, eggs, and small animals',
+            'behavior' => 'Highly social, forms complex family groups, known for mobbing predators'
         ],
         'Northern Cardinal' => [
             'name' => 'Northern Cardinal',
@@ -358,7 +375,9 @@ function getDefaultSpeciesInfo($speciesName) {
                 'Black mask around eyes (males)',
                 'Prominent red crest'
             ],
-            'habitat' => 'Woodlands, gardens, shrublands, and wetlands'
+            'habitat' => 'Woodlands, gardens, shrublands, and wetlands',
+            'diet' => 'Seeds, grains, fruits, and insects',
+            'behavior' => 'Non-migratory, territorial, males sing to defend territory'
         ]
     ];
 
