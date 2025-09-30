@@ -64,6 +64,12 @@ $supportedSpecies = SUPPORTED_SPECIES;
                     <li class="nav-item">
                         <a class="nav-link" href="species.php">Species Info</a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="login.html">Login</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="signup.html">Sign Up</a>
+                    </li>
                 </ul>
             </div>
         </div>
