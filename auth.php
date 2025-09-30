@@ -191,7 +191,7 @@ function handleLogin() {
         $stmt->execute([$sessionId, $user['user_id'], $expiresAt]);
         
         // Update last login
-        $updateLastLogin = "UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE user_id = ?";
+        $updateLastLogin = "UPDATE users SET last_login = NOW() WHERE user_id = ?";
         $stmt = $connection->prepare($updateLastLogin);
         $stmt->execute([$user['user_id']]);
         
@@ -257,7 +257,7 @@ function checkAuth() {
             SELECT s.session_id, u.user_id, u.email, u.is_active
             FROM user_sessions s
             JOIN users u ON s.user_id = u.user_id
-            WHERE s.session_id = ? AND s.expires_at > CURRENT_TIMESTAMP AND u.is_active = true
+            WHERE s.session_id = ? AND s.expires_at > NOW() AND u.is_active = 1
         ";
         $stmt = $connection->prepare($checkSession);
         $stmt->execute([$_SESSION['session_id']]);

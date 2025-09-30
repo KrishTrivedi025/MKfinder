@@ -222,4 +222,37 @@ function saveLegacyDatabase($data) {
     
     return true;
 }
+
+/**
+ * Check if user is logged in
+ */
+function isLoggedIn() {
+    initSession();
+    
+    if (!isset($_SESSION['user_id']) || !isset($_SESSION['session_id'])) {
+        return false;
+    }
+    
+    try {
+        $db = getDatabase();
+        $connection = $db->getConnection();
+        
+        // Check if session is valid
+        $checkSession = "
+            SELECT s.session_id, u.user_id, u.email, u.is_active
+            FROM user_sessions s
+            JOIN users u ON s.user_id = u.user_id
+            WHERE s.session_id = ? AND s.expires_at > NOW() AND u.is_active = 1
+        ";
+        $stmt = $connection->prepare($checkSession);
+        $stmt->execute([$_SESSION['session_id']]);
+        $session = $stmt->fetch();
+        
+        return $session !== false;
+        
+    } catch (Exception $e) {
+        logError('isLoggedIn check failed', ['error' => $e->getMessage()]);
+        return false;
+    }
+}
 ?>
