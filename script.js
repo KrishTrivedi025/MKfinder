@@ -29,6 +29,92 @@ const signupError = document.getElementById('signupError');
 const userEmail = document.getElementById('userEmail');
 const loadingOverlay = document.getElementById('loadingOverlay');
 
+// ── MK MODAL SYSTEM — replaces all browser alert/confirm ────────────────────
+// Single reusable confirm modal used everywhere in the app
+function showMKConfirm(icon, iconColor, title, message, confirmText, cancelText, onConfirm) {
+    let modal = document.getElementById('mkConfirmModal');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'mkConfirmModal';
+        modal.style.cssText = 'position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(13,27,42,.85);backdrop-filter:blur(8px);';
+        document.body.appendChild(modal);
+    }
+    modal.innerHTML = `
+        <div style="background:linear-gradient(135deg,#0d1b2a,#0f2236);border:1px solid rgba(116,198,157,.2);
+                    border-radius:20px;padding:36px 32px;max-width:380px;width:100%;text-align:center;
+                    box-shadow:0 32px 80px rgba(0,0,0,.5);animation:mkModalIn .25s ease;">
+            <div style="width:60px;height:60px;border-radius:50%;margin:0 auto 16px;
+                         background:${iconColor}18;border:2px solid ${iconColor}44;
+                         display:flex;align-items:center;justify-content:center;">
+                <i class="${icon}" style="font-size:1.4rem;color:${iconColor};"></i>
+            </div>
+            <div style="font-family:'Playfair Display',serif;font-size:1.15rem;font-weight:700;
+                        color:#fff;margin-bottom:8px;">${title}</div>
+            <div style="font-size:.85rem;color:rgba(255,255,255,.5);line-height:1.6;margin-bottom:24px;">
+                ${message}
+            </div>
+            <div style="display:flex;gap:10px;justify-content:center;">
+                <button id="mkConfirmYes" style="flex:1;max-width:160px;background:linear-gradient(135deg,#e63946,#f87171);
+                    color:#fff;border:none;border-radius:50px;padding:11px 20px;font-size:.85rem;
+                    font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;transition:transform .2s;"
+                    onmouseover="this.style.transform='translateY(-2px)'"
+                    onmouseout="this.style.transform='none'">${confirmText}</button>
+                <button id="mkConfirmNo" style="flex:1;max-width:160px;background:rgba(116,198,157,.12);
+                    color:#74c69d;border:1px solid rgba(116,198,157,.25);border-radius:50px;
+                    padding:11px 20px;font-size:.85rem;font-weight:600;cursor:pointer;
+                    font-family:'Inter',sans-serif;transition:transform .2s;"
+                    onmouseover="this.style.transform='translateY(-2px)'"
+                    onmouseout="this.style.transform='none'">${cancelText}</button>
+            </div>
+        </div>
+        <style>@keyframes mkModalIn{from{opacity:0;transform:scale(.92)}to{opacity:1;transform:scale(1)}}</style>`;
+    modal.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+    const close = () => { modal.style.display = 'none'; document.body.style.overflow = ''; };
+    document.getElementById('mkConfirmYes').onclick = () => { close(); onConfirm(); };
+    document.getElementById('mkConfirmNo').onclick  = close;
+    modal.onclick = (e) => { if (e.target === modal) close(); };
+}
+
+function showMKAlert(icon, iconColor, title, message) {
+    let modal = document.getElementById('mkAlertModal');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'mkAlertModal';
+        modal.style.cssText = 'position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(13,27,42,.85);backdrop-filter:blur(8px);';
+        document.body.appendChild(modal);
+    }
+    modal.innerHTML = `
+        <div style="background:linear-gradient(135deg,#0d1b2a,#0f2236);border:1px solid rgba(116,198,157,.2);
+                    border-radius:20px;padding:36px 32px;max-width:360px;width:100%;text-align:center;
+                    box-shadow:0 32px 80px rgba(0,0,0,.5);animation:mkModalIn .25s ease;">
+            <div style="width:56px;height:56px;border-radius:50%;margin:0 auto 14px;
+                         background:${iconColor}18;border:2px solid ${iconColor}44;
+                         display:flex;align-items:center;justify-content:center;">
+                <i class="${icon}" style="font-size:1.3rem;color:${iconColor};"></i>
+            </div>
+            <div style="font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:700;
+                        color:#fff;margin-bottom:8px;">${title}</div>
+            <div style="font-size:.85rem;color:rgba(255,255,255,.5);line-height:1.6;margin-bottom:20px;">
+                ${message}
+            </div>
+            <button id="mkAlertOk" style="background:linear-gradient(135deg,#40916c,#74c69d);
+                color:#fff;border:none;border-radius:50px;padding:11px 32px;font-size:.85rem;
+                font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;transition:transform .2s;"
+                onmouseover="this.style.transform='translateY(-2px)'"
+                onmouseout="this.style.transform='none'">OK</button>
+        </div>
+        <style>@keyframes mkModalIn{from{opacity:0;transform:scale(.92)}to{opacity:1;transform:scale(1)}}</style>`;
+    modal.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+    const close = () => { modal.style.display = 'none'; document.body.style.overflow = ''; };
+    document.getElementById('mkAlertOk').onclick = close;
+    modal.onclick = (e) => { if (e.target === modal) close(); };
+}
+
+// Set global login state for templates
+window.__mkLoggedIn = false;
+
 // Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
     initializeApp();
@@ -41,12 +127,9 @@ async function initializeApp() {
     console.log('initializeApp called');
     
     initializeEventListeners();
-    
-    // Always show main app on load (open website)
-    showMainAppPublic();
     hideAllSections();
     
-    // Check if user is already authenticated (but keep main app visible)
+    // Check if user is already authenticated
     await checkAuthStatus();
     
     console.log('initializeApp completed');
@@ -112,9 +195,11 @@ async function checkAuthStatus() {
         
         if (data.success && data.authenticated) {
             currentUser = data.user;
+            window.__mkLoggedIn = true;
             updateNavigationForLoggedInUser();
         } else {
             currentUser = null;
+            window.__mkLoggedIn = false;
             updateNavigationForGuestUser();
         }
     } catch (error) {
@@ -157,11 +242,16 @@ async function handleLogin(event) {
         
         if (data.success) {
             currentUser = data.user;
+            window.__mkLoggedIn = true;
+            loginForm.reset();
+            // If admin — redirect straight to admin panel
+            if (data.is_admin) {
+                window.location.href = 'admin.php';
+                return;
+            }
+            // Normal user — stay on page
             updateNavigationForLoggedInUser();
             hideAuthModal();
-            loginForm.reset();
-            // Show success message
-            alert('Login successful! You can now upload bird images.');
         } else {
             showLoginError(data.message || 'Login failed');
         }
@@ -239,27 +329,32 @@ async function handleSignup(event) {
  * Handle logout
  */
 async function handleLogout() {
-    try {
-        showLoadingOverlay();
-        
-        const response = await fetch('auth.php?action=logout', {
-            method: 'POST'
-        });
-        
-        const data = await response.json();
-        
-        if (data.success) {
-            currentUser = null;
-            updateNavigationForGuestUser();
-            hideAuthModal();
-            resetUpload();
-            alert('Logged out successfully!');
+    // Show beautiful confirm modal instead of browser confirm
+    showMKConfirm(
+        'fas fa-sign-out-alt',
+        '#f87171',
+        'Logout',
+        'Do you want to logout or explore more birds?',
+        'Yes, Logout',
+        'Explore More Birds',
+        async () => {
+            try {
+                showLoadingOverlay();
+                const response = await fetch('auth.php?action=logout', { method: 'POST' });
+                const data = await response.json();
+                if (data.success) {
+                    currentUser = null;
+                    updateNavigationForGuestUser();
+                    hideAuthModal();
+                    resetUpload();
+                }
+            } catch (error) {
+                console.error('Logout error:', error);
+            } finally {
+                hideLoadingOverlay();
+            }
         }
-    } catch (error) {
-        console.error('Logout error:', error);
-    } finally {
-        hideLoadingOverlay();
-    }
+    );
 }
 
 // =========================
@@ -395,13 +490,21 @@ function showSignupForm() {
  */
 function updateNavigationForLoggedInUser() {
     const guestNavItems = document.querySelectorAll('.guest-nav');
-    const userNavItems = document.querySelectorAll('.user-nav');
-    
+    const userNavItems  = document.querySelectorAll('.user-nav');
+
     guestNavItems.forEach(item => item.style.display = 'none');
-    userNavItems.forEach(item => item.style.display = 'block');
-    
-    if (userEmail && currentUser) {
-        userEmail.textContent = currentUser.email;
+    userNavItems.forEach(item  => item.style.display = 'block');
+
+    // Show full name (First + Last), fallback to email
+    const nameSpan = document.getElementById('userDisplayName');
+    if (nameSpan && currentUser) {
+        const full = [currentUser.first_name, currentUser.last_name].filter(Boolean).join(' ');
+        nameSpan.textContent = full || currentUser.email || '';
+    }
+    // Admin → name link goes to admin dashboard
+    const navLink = document.getElementById('userNavLink');
+    if (navLink && currentUser && currentUser.role === 'admin') {
+        navLink.href = 'admin.php';
     }
 }
 
@@ -527,12 +630,7 @@ function handleDrop(event) {
  * Validate file and show preview
  */
 function validateAndPreviewFile(file) {
-    // Check if user is logged in
-    if (!currentUser) {
-        showLoginRequiredAlert();
-        return;
-    }
-    
+    // Allow preview without login — login modal shows only when submitting unknown bird
     // Reset previous states
     hideAllSections();
     
@@ -564,14 +662,25 @@ function validateAndPreviewFile(file) {
     };
     reader.readAsDataURL(file);
 }
-
+        if (!window._locationAsked) {
+            window._locationAsked = true;
+            navigator.geolocation?.getCurrentPosition(pos => {
+            fetch(`https://nominatim.openstreetmap.org/reverse?lat=${pos.coords.latitude}&lon=${pos.coords.longitude}&format=json`)
+            .then(r=>r.json()).then(d=>{ window._userLocation = (d.address?.city||d.address?.town||d.address?.village||'') + (d.address?.country ? ', '+d.address.country : ''); });
+    });
+}          
 /**
  * Show login required alert
  */
 function showLoginRequiredAlert() {
-    const shouldLogin = confirm('You must be logged in to upload images for bird identification.\n\nWould you like to login now?');
-    if (shouldLogin) {
-        showLoginModal();
+    // Use beautiful modal if available (index.html), else redirect
+    if (typeof showLoginRequiredModal === 'function') {
+        showLoginRequiredModal(
+            '🔒 Login Required',
+            'You need to be logged in to upload images and identify bird species.'
+        );
+    } else {
+        window.location.href = 'login.html';
     }
 }
 
@@ -589,30 +698,51 @@ async function identifyBird() {
     if (loadingSection) loadingSection.style.display = 'block';
     isUploading = true;
 
-    // Prepare form data
+    // After 15 seconds, update loading message to warn about first-run download
+    const downloadNoticeTimer = setTimeout(() => {
+        const mainText = document.getElementById('loadingMainText');
+        const subText  = document.getElementById('loadingSubText');
+        if (mainText) mainText.textContent = 'Still working... AI is processing deeply.';
+        if (subText)  subText.textContent  = 'Complex images take a little longer — almost there!';
+    }, 15000);
+
+    // 3-minute timeout — needed for first-time HuggingFace model download
+    const controller = new AbortController();
+    const fetchTimeout = setTimeout(() => controller.abort(), 180000); // 3 minutes
+
     const formData = new FormData();
     formData.append('image', selectedFile);
+    if (window._userLocation) formData.append('location', window._userLocation);
 
     try {
         const response = await fetch('identify.php', {
             method: 'POST',
-            body: formData
+            body: formData,
+            signal: controller.signal
         });
 
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
+        clearTimeout(fetchTimeout);
+        clearTimeout(downloadNoticeTimer);
 
+        // Always read JSON body — even on 400 (e.g. NOT_A_BIRD error)
         const data = await response.json();
 
         if (data.success) {
             displayResults(data);
+        } else if (data.error_code === 'NOT_A_BIRD') {
+            showNotABirdError(data.message);
         } else {
             showError(data.message || 'Identification failed. Please try again.');
         }
     } catch (error) {
+        clearTimeout(fetchTimeout);
+        clearTimeout(downloadNoticeTimer);
         console.error('Identification error:', error);
-        showError('Network error occurred. Please check your connection and try again.');
+        if (error.name === 'AbortError') {
+            showError('This is taking longer than expected. Please try again in a moment.');
+        } else {
+            showError('Network error occurred. Please check your connection and try again.');
+        }
     } finally {
         hideLoadingState();
         isUploading = false;
@@ -624,67 +754,271 @@ async function identifyBird() {
  */
 function displayResults(data) {
     if (!resultsContent) return;
-    
-    const species = data.species_info || data;
-    const confidence = data.confidence || 95;
-    
-    // Create results HTML
-    const resultsHTML = `
-        <div class="row">
-            <div class="col-md-4 text-center mb-3">
-                <img src="images/${species.name.toLowerCase().replace(/\s+/g, '-')}.svg" 
-                     alt="${species.name}" 
-                     class="img-fluid" 
-                     style="max-height: 200px;">
-            </div>
-            <div class="col-md-8">
-                <h4 class="text-primary">${species.name}</h4>
-                <p class="text-muted"><em>${species.scientific_name}</em></p>
-                <div class="mb-3">
-                    <div class="d-flex align-items-center mb-2">
-                        <strong class="me-2">Confidence:</strong>
-                        <div class="progress flex-grow-1 me-2" style="height: 20px;">
-                            <div class="progress-bar bg-success" 
-                                 style="width: ${confidence}%"
-                                 aria-valuenow="${confidence}" 
-                                 aria-valuemin="0" 
-                                 aria-valuemax="100">
-                            </div>
-                        </div>
-                        <span class="badge bg-success">${confidence}%</span>
-                    </div>
+
+    // ── UNKNOWN BIRD ─────────────────────────────────────────
+    if (data.unknown) {
+        const imgUrl = data.image_url || '';
+        resultsContent.innerHTML = `
+            <div style="text-align:center;padding:10px 0 18px;">
+                ${imgUrl ? `<img src="${imgUrl}" alt="uploaded"
+                    style="width:80px;height:80px;object-fit:cover;border-radius:14px;
+                           border:2px solid rgba(248,113,113,.35);margin-bottom:14px;">` : ''}
+                <div style="width:56px;height:56px;border-radius:50%;margin:0 auto 14px;
+                             background:rgba(248,113,113,.12);border:2px solid rgba(248,113,113,.3);
+                             display:flex;align-items:center;justify-content:center;">
+                    <i class="fas fa-question" style="font-size:1.4rem;color:#f87171;"></i>
                 </div>
-                <p><strong>Description:</strong> ${species.description}</p>
-                <p><strong>Habitat:</strong> ${species.habitat}</p>
-                <p><strong>Diet:</strong> ${species.diet}</p>
-                <p><strong>Behavior:</strong> ${species.behavior}</p>
-                <p><strong>Conservation Status:</strong> 
-                   <span class="badge bg-info">${species.conservation_status}</span>
-                </p>
+                <div style="font-family:'Playfair Display',serif;font-size:1.2rem;
+                            font-weight:700;color:#f87171;margin-bottom:8px;">Unknown Bird</div>
+                <div style="font-size:.83rem;color:rgba(255,255,255,.5);margin-bottom:20px;line-height:1.6;">
+                    Our AI couldn't identify this species with enough confidence.<br>
+                    Help us improve — submit it for admin review!
+                </div>
             </div>
+
+            <!-- Submission Box: login prompt if guest, form if logged in -->
+            <div style="background:rgba(255,255,255,.04);border:1px solid rgba(116,198,157,.2);
+                        border-radius:16px;padding:18px;" id="unknownSubmitBox">
+                ${!window.__mkLoggedIn
+                  ? `<div style="text-align:center;padding:8px 0 4px;">
+                        <div style="width:48px;height:48px;border-radius:50%;margin:0 auto 12px;
+                                    background:rgba(116,198,157,.15);border:1.5px solid rgba(116,198,157,.3);
+                                    display:flex;align-items:center;justify-content:center;">
+                            <i class="fas fa-lock" style="color:#74c69d;font-size:1.1rem;"></i>
+                        </div>
+                        <div style="font-size:.88rem;font-weight:700;color:#fff;margin-bottom:6px;">
+                            Login to Submit for Review
+                        </div>
+                        <div style="font-size:.78rem;color:rgba(255,255,255,.45);margin-bottom:16px;line-height:1.5;">
+                            Help us improve MKfinder by submitting this unknown bird.<br>Login or create a free account to continue.
+                        </div>
+                        <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+                            <a href="login.html" style="flex:1;min-width:110px;max-width:160px;
+                                background:linear-gradient(135deg,#40916c,#74c69d);color:#fff;
+                                border-radius:50px;padding:10px 18px;font-size:.83rem;font-weight:700;
+                                text-decoration:none;display:inline-flex;align-items:center;
+                                justify-content:center;gap:7px;font-family:'Inter',sans-serif;transition:transform .2s;"
+                                onmouseover="this.style.transform='translateY(-2px)'"
+                                onmouseout="this.style.transform='none'">
+                                <i class="fas fa-sign-in-alt"></i> Login
+                            </a>
+                            <a href="signup.html" style="flex:1;min-width:110px;max-width:160px;
+                                background:rgba(255,255,255,.08);color:rgba(255,255,255,.8);
+                                border:1px solid rgba(255,255,255,.15);border-radius:50px;
+                                padding:10px 18px;font-size:.83rem;font-weight:600;
+                                text-decoration:none;display:inline-flex;align-items:center;
+                                justify-content:center;gap:7px;font-family:'Inter',sans-serif;transition:transform .2s;"
+                                onmouseover="this.style.transform='translateY(-2px)'"
+                                onmouseout="this.style.transform='none'">
+                                <i class="fas fa-user-plus"></i> Sign Up Free
+                            </a>
+                        </div>
+                        <button onclick="resetUpload()" style="margin-top:12px;background:none;
+                            border:none;color:rgba(255,255,255,.3);font-size:.75rem;cursor:pointer;
+                            font-family:'Inter',sans-serif;">
+                            <i class="fas fa-redo me-1"></i> Try another photo
+                        </button>
+                    </div>`
+                  : `<div style="font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;
+                                color:#74c69d;margin-bottom:14px;">
+                        <i class="fas fa-paper-plane me-1"></i> Submit to Admin for Review
+                    </div>
+                    <input id="ub_species" placeholder="What bird do you think this is? (optional)"
+                        style="width:100%;background:#fff;border:1.5px solid rgba(116,198,157,.4);
+                               border-radius:10px;padding:10px 14px;color:#1a1a1a;font-size:.85rem;
+                               font-family:'Inter',sans-serif;outline:none;margin-bottom:10px;" />
+                    <textarea id="ub_note" rows="2" placeholder="Any extra details for the admin? (optional)"
+                        style="width:100%;background:#fff;border:1.5px solid rgba(116,198,157,.4);
+                               border-radius:10px;padding:10px 14px;color:#1a1a1a;font-size:.85rem;
+                               font-family:'Inter',sans-serif;outline:none;resize:none;margin-bottom:14px;"></textarea>
+                    <div id="ub_msg" style="display:none;font-size:.82rem;padding:8px 12px;
+                                             border-radius:8px;margin-bottom:10px;"></div>
+                    <div style="display:flex;gap:10px;">
+                        <button onclick="submitUnknownBird('${data.identification_id}','${data.image_hash}')"
+                            style="flex:1;background:linear-gradient(135deg,#40916c,#74c69d);
+                                   color:#fff;border:none;border-radius:50px;padding:10px 18px;
+                                   font-size:.83rem;font-weight:700;cursor:pointer;
+                                   font-family:'Inter',sans-serif;transition:transform .2s;"
+                            onmouseover="this.style.transform='translateY(-2px)'"
+                            onmouseout="this.style.transform='none'">
+                            <i class="fas fa-paper-plane me-1"></i> Submit Request
+                        </button>
+                        <button onclick="resetUpload()"
+                            style="background:rgba(255,255,255,.08);color:rgba(255,255,255,.7);
+                                   border:1px solid rgba(255,255,255,.15);border-radius:50px;
+                                   padding:10px 16px;font-size:.83rem;cursor:pointer;
+                                   font-family:'Inter',sans-serif;transition:transform .2s;"
+                            onmouseover="this.style.transform='translateY(-2px)'"
+                            onmouseout="this.style.transform='none'">
+                            <i class="fas fa-redo"></i>
+                        </button>
+                    </div>`}
+            </div>
+        `;
+        if (resultsSection) resultsSection.style.display = 'block';
+        return;
+    }
+
+    // ── KNOWN BIRD ───────────────────────────────────────────
+    const species    = data.species_info || data;
+    const confidence = data.confidence || 95;
+    const imgUrl     = data.image_url || '';
+    const mode       = data.mode || '';
+
+    const statusColors = {
+        'Least Concern':        '#74c69d',
+        'Near Threatened':      '#facc15',
+        'Vulnerable':           '#fb923c',
+        'Endangered':           '#f87171',
+        'Critically Endangered':'#dc2626',
+    };
+    const statusColor = statusColors[species.conservation_status] || '#9ca3af';
+    const barColor = confidence >= 80 ? '#74c69d' : confidence >= 60 ? '#facc15' : '#f87171';
+
+    const chars = Array.isArray(species.characteristics) ? species.characteristics : [];
+    const charsHTML = chars.length ? `
+        <div style="margin-top:14px;">
+            <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;
+                        color:rgba(255,255,255,.4);margin-bottom:8px;">Key Characteristics</div>
+            <div style="display:flex;flex-wrap:wrap;gap:6px;">
+                ${chars.map(c => `
+                    <span style="background:rgba(116,198,157,.12);border:1px solid rgba(116,198,157,.25);
+                                 color:rgba(255,255,255,.8);font-size:.75rem;padding:3px 10px;border-radius:50px;">
+                        <i class="fas fa-check" style="color:#74c69d;margin-right:4px;font-size:.65rem;"></i>${c}
+                    </span>`).join('')}
+            </div>
+        </div>` : '';
+
+    const infoRows = [
+        { icon: 'fa-tree',           label: 'Habitat',  val: species.habitat },
+        { icon: 'fa-drumstick-bite', label: 'Diet',     val: species.diet },
+        { icon: 'fa-feather-alt',    label: 'Behavior', val: species.behavior },
+    ].filter(r => r.val).map(r => `
+        <div style="display:flex;gap:10px;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.06);">
+            <div style="width:28px;height:28px;border-radius:8px;background:rgba(116,198,157,.15);
+                        display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                <i class="fas ${r.icon}" style="color:#74c69d;font-size:.75rem;"></i>
+            </div>
+            <div>
+                <div style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;
+                            color:rgba(255,255,255,.35);">${r.label}</div>
+                <div style="font-size:.82rem;color:rgba(255,255,255,.8);margin-top:1px;">${r.val}</div>
+            </div>
+        </div>`).join('');
+
+    resultsContent.innerHTML = `
+        <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px;">
+            ${imgUrl ? `<img src="${imgUrl}" alt="uploaded bird"
+                style="width:62px;height:62px;object-fit:cover;border-radius:12px;
+                       border:2px solid rgba(116,198,157,.35);flex-shrink:0;">` : ''}
+            <div style="flex:1;min-width:0;">
+                <div style="font-family:'Playfair Display',serif;font-size:1.25rem;font-weight:700;
+                            color:#74c69d;line-height:1.2;">${species.name}</div>
+                <div style="font-size:.8rem;color:rgba(255,255,255,.45);font-style:italic;">
+                    ${species.scientific_name || ''}</div>
+            </div>
+            <span style="background:${statusColor}22;color:${statusColor};border:1px solid ${statusColor}44;
+                         font-size:.68rem;font-weight:700;padding:3px 10px;border-radius:50px;
+                         white-space:nowrap;flex-shrink:0;">
+                <i class="fas fa-shield-alt" style="margin-right:3px;font-size:.6rem;"></i>
+                ${species.conservation_status || 'Unknown'}
+            </span>
         </div>
-        
-        <div class="mt-4">
-            <h5>Key Characteristics:</h5>
-            <ul class="list-unstyled">
-                ${species.characteristics.map(char => `<li><i class="fas fa-check text-success me-2"></i>${char}</li>`).join('')}
-            </ul>
+
+        <div style="margin-bottom:14px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;">
+                <span style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;
+                             color:rgba(255,255,255,.4);">AI Confidence</span>
+                <span style="font-size:.9rem;font-weight:800;color:${barColor};">${confidence}%</span>
+            </div>
+            <div style="height:6px;background:rgba(255,255,255,.1);border-radius:50px;overflow:hidden;">
+                <div style="height:100%;width:${confidence}%;background:${barColor};
+                            border-radius:50px;transition:width .8s ease;"></div>
+            </div>
+            ${mode === 'ai_model' ? `<div style="font-size:.68rem;color:rgba(116,198,157,.6);margin-top:4px;">
+                <i class="fas fa-brain" style="margin-right:3px;"></i>Real AI Model</div>` :
+              mode === 'override' ? `<div style="font-size:.68rem;color:rgba(116,198,157,.6);margin-top:4px;">
+                <i class="fas fa-check-circle" style="margin-right:3px;"></i>AI Trained</div>` :
+              mode === 'demo' ? `<div style="font-size:.68rem;color:rgba(255,204,0,.5);margin-top:4px;">
+                <i class="fas fa-flask" style="margin-right:3px;"></i>Demo Mode</div>` : ''}
         </div>
-        
-        <div class="mt-4 text-center">
-            <button class="btn btn-primary me-2" onclick="resetUpload()">
-                <i class="fas fa-plus me-2"></i>
-                Identify Another Bird
+
+        ${species.description ? `
+        <div style="font-size:.83rem;color:rgba(255,255,255,.65);line-height:1.6;
+                    padding:10px 12px;background:rgba(255,255,255,.04);border-radius:10px;
+                    border-left:3px solid rgba(116,198,157,.4);margin-bottom:14px;">
+            ${species.description}
+        </div>` : ''}
+
+        ${infoRows}
+        ${charsHTML}
+
+        <div style="display:flex;gap:10px;margin-top:18px;flex-wrap:wrap;">
+            <button onclick="resetUpload()" style="flex:1;min-width:120px;
+                background:linear-gradient(135deg,#40916c,#74c69d);color:#fff;border:none;
+                border-radius:50px;padding:10px 18px;font-size:.83rem;font-weight:700;
+                cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;
+                font-family:'Inter',sans-serif;transition:transform .2s;"
+                onmouseover="this.style.transform='translateY(-2px)'"
+                onmouseout="this.style.transform='translateY(0)'">
+                <i class="fas fa-redo"></i> Identify Another
             </button>
-            <a href="species.php" class="btn btn-outline-primary">
-                <i class="fas fa-info-circle me-2"></i>
-                Learn More About Birds
+            <a href="species.php?species=${encodeURIComponent(species.name)}"
+                style="flex:1;min-width:120px;background:rgba(255,255,255,.08);
+                color:rgba(255,255,255,.85);border:1px solid rgba(255,255,255,.18);
+                border-radius:50px;padding:10px 18px;font-size:.83rem;font-weight:600;
+                text-decoration:none;display:flex;align-items:center;justify-content:center;gap:7px;
+                transition:transform .2s;"
+                onmouseover="this.style.transform='translateY(-2px)'"
+                onmouseout="this.style.transform='translateY(0)'">
+                <i class="fas fa-binoculars"></i> Full Profile
             </a>
         </div>
     `;
-    
-    resultsContent.innerHTML = resultsHTML;
+
     if (resultsSection) resultsSection.style.display = 'block';
+}
+
+/**
+ * Submit unknown bird to admin
+ */
+async function submitUnknownBird(imgUrl) {
+    const birdName  = (document.getElementById('ub_name')?.value    || '').trim();
+    const desc      = (document.getElementById('ub_desc')?.value    || '').trim();
+    const habitat   = (document.getElementById('ub_habitat')?.value || '').trim();
+    const msgEl     = document.getElementById('ub_msg');
+
+    const showMsg = (text, isErr) => {
+        if (!msgEl) return;
+        msgEl.textContent = text;
+        msgEl.style.display = 'block';
+        msgEl.style.background  = isErr ? 'rgba(248,113,113,.12)' : 'rgba(116,198,157,.12)';
+        msgEl.style.color       = isErr ? '#f87171' : '#74c69d';
+        msgEl.style.border      = isErr ? '1px solid rgba(248,113,113,.25)' : '1px solid rgba(116,198,157,.25)';
+    };
+
+    try {
+        // Build a FormData from the already-uploaded image path
+        const fd = new FormData();
+        fd.append('bird_name',   birdName  || 'Unknown Bird');
+        fd.append('description', desc);
+        fd.append('habitat',     habitat);
+        // Re-attach the file if still in memory
+        if (selectedFile) fd.append('image', selectedFile);
+
+        const res  = await fetch('add_species.php', { method: 'POST', body: fd });
+        const data = await res.json();
+
+        if (data.success) {
+            showMsg('✓ Submitted! Our admin will review your bird.', false);
+            document.getElementById('unknownSubmitBox').style.opacity = '0.6';
+            document.getElementById('unknownSubmitBox').style.pointerEvents = 'none';
+        } else {
+            showMsg(data.message || 'Submission failed. Please try again.', true);
+        }
+    } catch(e) {
+        showMsg('Network error. Please check XAMPP is running.', true);
+    }
 }
 
 /**
@@ -694,6 +1028,56 @@ function showError(message) {
     hideAllSections();
     if (errorContent) errorContent.textContent = message;
     if (errorSection) errorSection.style.display = 'block';
+}
+
+/**
+ * Show "not a bird photo" beautiful card
+ */
+function showNotABirdError(customMsg) {
+    hideAllSections();
+    if (!resultsContent) return;
+
+    const msg = customMsg || "Our AI detected that this image doesn't contain a bird. Please upload a clear photo of a bird.";
+
+    resultsContent.innerHTML = `
+        <div style="text-align:center;padding:16px 8px;">
+            <div style="width:64px;height:64px;border-radius:50%;margin:0 auto 16px;
+                         background:rgba(251,146,60,.12);border:2px solid rgba(251,146,60,.3);
+                         display:flex;align-items:center;justify-content:center;">
+                <i class="fas fa-ban" style="font-size:1.6rem;color:#fb923c;"></i>
+            </div>
+            <div style="font-family:'Playfair Display',serif;font-size:1.15rem;
+                        font-weight:700;color:#fb923c;margin-bottom:10px;">
+                Not a Bird Photo
+            </div>
+            <div style="font-size:.85rem;color:rgba(255,255,255,.55);line-height:1.7;
+                        margin-bottom:20px;max-width:300px;margin-left:auto;margin-right:auto;">
+                ${msg}
+            </div>
+            <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+                <button onclick="resetUpload()"
+                    style="background:linear-gradient(135deg,#40916c,#74c69d);color:#fff;
+                           border:none;border-radius:50px;padding:10px 22px;font-size:.83rem;
+                           font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;
+                           transition:transform .2s;"
+                    onmouseover="this.style.transform='translateY(-2px)'"
+                    onmouseout="this.style.transform='none'">
+                    <i class="fas fa-redo me-1"></i> Try Another Photo
+                </button>
+                <a href="species.php"
+                    style="background:rgba(255,255,255,.08);color:rgba(255,255,255,.8);
+                           border:1px solid rgba(255,255,255,.18);border-radius:50px;
+                           padding:10px 22px;font-size:.83rem;font-weight:600;
+                           text-decoration:none;display:inline-flex;align-items:center;gap:7px;
+                           transition:transform .2s;"
+                    onmouseover="this.style.transform='translateY(-2px)'"
+                    onmouseout="this.style.transform='none'">
+                    <i class="fas fa-feather"></i> View Species
+                </a>
+            </div>
+        </div>
+    `;
+    if (resultsSection) resultsSection.style.display = 'block';
 }
 
 /**

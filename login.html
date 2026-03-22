@@ -3,270 +3,516 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - MKfinder</title>
+    <title>Login – MKfinder</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link href="styles.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
+
     <style>
-        body {
-            background: linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%);
-            min-height: 100vh;
+        *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+        :root {
+            --primary:       #2d6a4f;
+            --primary-light: #40916c;
+            --accent:        #74c69d;
+            --bg-dark:       #0d1b2a;
+            --text-muted:    rgba(255,255,255,0.45);
+            --border:        rgba(116,198,157,0.18);
+            --transition:    all 0.3s cubic-bezier(0.4,0,0.2,1);
+        }
+
+        html, body { height:100%; font-family:'Inter',sans-serif; overflow:hidden; }
+
+        /* ── SPLIT LAYOUT ── */
+        .split { display:flex; height:100vh; width:100vw; }
+
+        /* ───────────────────────────────────
+           LEFT PANEL — FORM
+        ─────────────────────────────────── */
+        .left-panel {
+            width: 46%;
+            min-width: 420px;
+            background: var(--bg-dark);
             display: flex;
-            align-items: center;
+            flex-direction: column;
             justify-content: center;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            align-items: center;
+            padding: 52px 60px;
+            position: relative;
+            overflow-y: auto;
+            z-index: 2;
         }
-        
-        .auth-container {
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-            padding: 40px 35px;
-            width: 100%;
-            max-width: 420px;
-            backdrop-filter: blur(10px);
+
+        /* glow accents */
+        .left-panel::before {
+            content:'';
+            position:absolute; top:-140px; left:-140px;
+            width:420px; height:420px;
+            background:radial-gradient(circle,rgba(64,145,108,.22) 0%,transparent 70%);
+            pointer-events:none;
         }
-        
+        .left-panel::after {
+            content:'';
+            position:absolute; bottom:-80px; right:-60px;
+            width:260px; height:260px;
+            background:radial-gradient(circle,rgba(116,198,157,.1) 0%,transparent 70%);
+            pointer-events:none;
+        }
+
+        .form-inner { width:100%; max-width:370px; position:relative; z-index:1; }
+
+        /* Logo */
         .auth-logo {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 25px;
+            display:flex; align-items:center; gap:10px;
+            margin-bottom:38px; text-decoration:none;
         }
-        
         .logo-mk {
-            background: #4CAF50;
-            color: white;
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            font-size: 18px;
-            margin-right: 10px;
+            background:linear-gradient(135deg,var(--primary-light),var(--accent));
+            color:#fff; font-weight:800; font-size:.95rem;
+            padding:7px 11px; border-radius:10px; letter-spacing:1px;
         }
-        
         .brand-name {
-            font-size: 28px;
-            font-weight: 600;
-            color: #333;
+            font-family:'Playfair Display',serif;
+            font-size:1.6rem; color:#fff; font-weight:700;
         }
-        
-        .auth-title {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 30px;
-            font-size: 24px;
-            font-weight: 600;
-            color: #333;
+
+        /* Heading */
+        .heading { margin-bottom:30px; }
+        .heading h1 {
+            font-size:1.8rem; font-weight:700; color:#fff;
+            line-height:1.2; margin-bottom:8px;
         }
-        
-        .auth-title i {
-            margin-right: 10px;
-            color: #4CAF50;
+        .heading h1 em { color:var(--accent); font-style:normal; }
+        .heading p { font-size:.875rem; color:var(--text-muted); }
+
+        .accent-bar {
+            width:40px; height:3px;
+            background:linear-gradient(90deg,var(--primary-light),var(--accent));
+            border-radius:2px; margin-bottom:28px;
         }
-        
-        .form-label {
-            font-weight: 500;
-            color: #555;
-            margin-bottom: 8px;
+
+        /* Labels */
+        label.lbl {
+            display:block; font-size:.77rem; font-weight:600;
+            text-transform:uppercase; letter-spacing:.6px;
+            color:var(--text-muted); margin-bottom:7px;
         }
-        
-        .form-control {
-            border: 2px solid #e0e0e0;
-            border-radius: 10px;
-            padding: 12px 15px;
-            font-size: 16px;
-            transition: all 0.3s ease;
-            margin-bottom: 20px;
+
+        /* Fields */
+        .field {
+            position:relative; margin-bottom:20px;
         }
-        
-        .form-control:focus {
-            border-color: #4CAF50;
-            box-shadow: 0 0 0 0.2rem rgba(76, 175, 80, 0.25);
+        .field .ficon {
+            position:absolute; left:15px; top:50%; transform:translateY(-50%);
+            color:rgba(116,198,157,.5); font-size:.85rem;
+            pointer-events:none; z-index:1;
         }
-        
-        .btn-auth {
-            background: #4CAF50;
-            border: none;
-            border-radius: 10px;
-            padding: 12px 25px;
-            font-size: 16px;
-            font-weight: 600;
-            color: white;
-            width: 100%;
-            transition: all 0.3s ease;
-            margin-bottom: 15px;
+        .field input {
+            width:100%;
+            background:rgba(255,255,255,.05);
+            border:1.5px solid var(--border);
+            border-radius:12px;
+            padding:13px 44px 13px 42px;
+            font-size:.9rem; color:#fff;
+            font-family:'Inter',sans-serif;
+            outline:none; transition:var(--transition);
         }
-        
-        .btn-auth:hover {
-            background: #45a049;
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+        .field input::placeholder { color:rgba(255,255,255,.2); }
+        .field input:focus {
+            border-color:rgba(116,198,157,.5);
+            background:rgba(255,255,255,.07);
+            box-shadow:0 0 0 3px rgba(116,198,157,.1);
         }
-        
-        .btn-back {
-            background: transparent;
-            border: 2px solid #e0e0e0;
-            border-radius: 10px;
-            padding: 12px 25px;
-            font-size: 16px;
-            font-weight: 500;
-            color: #666;
-            width: 100%;
-            transition: all 0.3s ease;
+        .pwd-btn {
+            position:absolute; right:14px; top:50%; transform:translateY(-50%);
+            background:none; border:none;
+            color:rgba(255,255,255,.28); cursor:pointer;
+            font-size:.85rem; padding:0; transition:color .2s; z-index:1;
         }
-        
-        .btn-back:hover {
-            border-color: #4CAF50;
-            color: #4CAF50;
-            background: rgba(76, 175, 80, 0.05);
+        .pwd-btn:hover { color:var(--accent); }
+
+        /* Remember / Forgot row */
+        .row-extra {
+            display:flex; justify-content:space-between;
+            align-items:center; margin-bottom:24px;
         }
-        
-        .error-message {
-            background: #ffebee;
-            border: 1px solid #ef5350;
-            border-radius: 8px;
-            padding: 12px;
-            margin-bottom: 20px;
-            color: #c62828;
-            font-size: 14px;
-            display: none;
+        .check-label {
+            display:flex; align-items:center; gap:7px;
+            font-size:.82rem; color:var(--text-muted); cursor:pointer;
         }
-        
-        .success-message {
-            background: #e8f5e8;
-            border: 1px solid #4CAF50;
-            border-radius: 8px;
-            padding: 12px;
-            margin-bottom: 20px;
-            color: #2e7d32;
-            font-size: 14px;
-            display: none;
+        .check-label input { accent-color:var(--primary-light); cursor:pointer; }
+        .forgot { font-size:.82rem; color:rgba(116,198,157,.65); text-decoration:none; transition:color .2s; }
+        .forgot:hover { color:var(--accent); }
+
+        /* Primary button */
+        .btn-primary-custom {
+            width:100%; padding:14px; border:none;
+            border-radius:12px;
+            background:linear-gradient(135deg,var(--primary-light) 0%,#52b788 100%);
+            color:#fff; font-size:.93rem; font-weight:600;
+            font-family:'Inter',sans-serif; cursor:pointer;
+            position:relative; overflow:hidden;
+            transition:var(--transition); letter-spacing:.3px;
         }
-        
-        .signup-link {
-            text-align: center;
-            margin-top: 20px;
+        .btn-primary-custom::after {
+            content:'';
+            position:absolute; inset:0;
+            background:linear-gradient(90deg,transparent,rgba(255,255,255,.08),transparent);
+            transform:translateX(-100%); transition:transform .5s;
         }
-        
-        .signup-link a {
-            color: #4CAF50;
-            text-decoration: none;
-            font-weight: 500;
+        .btn-primary-custom:hover::after { transform:translateX(100%); }
+        .btn-primary-custom:hover { transform:translateY(-2px); box-shadow:0 10px 28px rgba(64,145,108,.4); }
+        .btn-primary-custom:active { transform:translateY(0); }
+        .btn-primary-custom:disabled { opacity:.55; transform:none; cursor:not-allowed; }
+
+        /* Ghost button */
+        .btn-ghost {
+            width:100%; padding:12px; margin-top:10px;
+            border:1.5px solid rgba(116,198,157,.18);
+            border-radius:12px; background:transparent;
+            color:var(--text-muted); font-size:.85rem;
+            font-family:'Inter',sans-serif; cursor:pointer;
+            transition:var(--transition);
         }
-        
-        .signup-link a:hover {
-            text-decoration: underline;
+        .btn-ghost:hover {
+            border-color:rgba(116,198,157,.38);
+            color:var(--accent); background:rgba(116,198,157,.05);
+        }
+
+        /* Alert messages */
+        .alert-box {
+            display:none; align-items:flex-start; gap:9px;
+            border-radius:10px; padding:12px 14px;
+            font-size:.83rem; margin-bottom:18px; line-height:1.5;
+        }
+        .alert-box.err {
+            background:rgba(248,113,113,.1);
+            border:1px solid rgba(248,113,113,.28);
+            color:#fca5a5;
+        }
+        .alert-box.ok {
+            background:rgba(116,198,157,.1);
+            border:1px solid rgba(116,198,157,.28);
+            color:var(--accent);
+        }
+
+        /* Switch link */
+        .switch-txt {
+            text-align:center; margin-top:26px;
+            font-size:.84rem; color:var(--text-muted);
+        }
+        .switch-txt a { color:var(--accent); font-weight:600; text-decoration:none; margin-left:4px; }
+        .switch-txt a:hover { text-decoration:underline; }
+
+        /* ───────────────────────────────────
+           RIGHT PANEL — IMAGE
+        ─────────────────────────────────── */
+        .right-panel {
+            flex:1; position:relative; overflow:hidden;
+            background:#071320;
+        }
+        .right-panel .bg-photo {
+            position:absolute; inset:0;
+            background:
+                url('https://images.unsplash.com/photo-1444464666168-49d633b86797?w=1400&q=85&fit=crop')
+                center center / cover no-repeat;
+            transform:scale(1.05);
+            transition:transform 14s ease;
+        }
+        .right-panel:hover .bg-photo { transform:scale(1.0); }
+
+        .right-panel .overlay {
+            position:absolute; inset:0;
+            background:
+                linear-gradient(to right,  rgba(13,27,42,.6)  0%, rgba(13,27,42,.1)  100%),
+                linear-gradient(to top,    rgba(13,27,42,.75) 0%, transparent 55%);
+        }
+
+        /* Stat pills — top right */
+        .stat-pills {
+            position:absolute; top:40px; right:40px;
+            display:flex; flex-direction:column; gap:10px; z-index:2;
+        }
+        .pill {
+            display:flex; align-items:center; gap:10px;
+            background:rgba(13,27,42,.65);
+            border:1px solid rgba(116,198,157,.2);
+            border-radius:50px; padding:8px 16px;
+            backdrop-filter:blur(14px);
+            animation:slideInRight .6s ease both;
+        }
+        .pill:nth-child(1){ animation-delay:.1s; }
+        .pill:nth-child(2){ animation-delay:.25s; }
+        .pill:nth-child(3){ animation-delay:.4s; }
+        @keyframes slideInRight {
+            from{ opacity:0; transform:translateX(30px); }
+            to  { opacity:1; transform:translateX(0); }
+        }
+        .pill-ico {
+            width:28px; height:28px; border-radius:50%;
+            background:linear-gradient(135deg,var(--primary-light),var(--accent));
+            display:flex; align-items:center; justify-content:center;
+            font-size:.7rem; color:#fff; flex-shrink:0;
+        }
+        .pill-val { font-size:.88rem; font-weight:700; color:#fff; line-height:1.2; }
+        .pill-lbl { font-size:.7rem;  color:rgba(255,255,255,.45); }
+
+        /* Bird silhouette SVG overlay (decorative) */
+        .bird-silhouette {
+            position:absolute; top:50%; left:50%; z-index:2;
+            transform:translate(-50%,-50%);
+            opacity:.06; pointer-events:none;
+            animation:birdDrift 10s ease-in-out infinite;
+        }
+        @keyframes birdDrift {
+            0%,100%{ transform:translate(-50%,-50%) rotate(-3deg) scale(1);    }
+            50%    { transform:translate(-46%,-54%) rotate(3deg)  scale(1.04); }
+        }
+
+        /* Bottom quote */
+        .img-content {
+            position:absolute; bottom:48px; left:48px; right:48px; z-index:2;
+            animation:fadeUp .8s ease both;
+        }
+        @keyframes fadeUp {
+            from{ opacity:0; transform:translateY(20px); }
+            to  { opacity:1; transform:translateY(0);    }
+        }
+        .img-tag {
+            display:inline-flex; align-items:center; gap:7px;
+            background:rgba(116,198,157,.15);
+            border:1px solid rgba(116,198,157,.3);
+            border-radius:20px; padding:5px 14px;
+            font-size:.74rem; font-weight:600; color:var(--accent);
+            letter-spacing:.5px; text-transform:uppercase;
+            margin-bottom:14px; backdrop-filter:blur(8px);
+        }
+        .img-quote {
+            font-family:'Playfair Display',serif;
+            font-size:2rem; font-weight:700; color:#fff;
+            line-height:1.28; margin-bottom:12px;
+            text-shadow:0 2px 20px rgba(0,0,0,.5);
+        }
+        .img-quote em { color:var(--accent); font-style:normal; }
+        .img-sub {
+            font-size:.85rem; color:rgba(255,255,255,.5);
+            line-height:1.65; max-width:360px;
+        }
+
+        /* Floating dots (decorative) */
+        .fdots { position:absolute; inset:0; pointer-events:none; z-index:1; }
+        .fdot {
+            position:absolute; width:5px; height:5px;
+            background:var(--accent); border-radius:50%;
+            opacity:0; animation:fdotAnim 7s ease-in-out infinite;
+        }
+        .fdot:nth-child(1){ top:18%; left:12%; animation-delay:0s; }
+        .fdot:nth-child(2){ top:32%; left:62%; animation-delay:2s; }
+        .fdot:nth-child(3){ top:58%; left:28%; animation-delay:4s; }
+        .fdot:nth-child(4){ top:72%; left:78%; animation-delay:1s; }
+        @keyframes fdotAnim {
+            0%,100%{ opacity:0; transform:scale(0) translateY(0); }
+            30%    { opacity:.6; transform:scale(1) translateY(-10px); }
+            70%    { opacity:.2; transform:scale(.8) translateY(-35px); }
+        }
+
+        /* ── RESPONSIVE ── */
+        @media(max-width:900px){
+            .right-panel{ display:none; }
+            .left-panel { width:100%; min-width:unset; padding:40px 28px; }
+            html,body { overflow:auto; }
+        }
+        @media(max-width:480px){
+            .left-panel{ padding:32px 20px; }
         }
     </style>
 </head>
 <body>
-    <div class="auth-container">
-        <div class="auth-logo">
-            <div class="logo-mk">MK</div>
-            <span class="brand-name">finder</span>
-        </div>
-        
-        <div class="auth-title">
-            <i class="fas fa-sign-in-alt"></i>
-            Welcome Back
-        </div>
-        
-        <form id="loginForm">
-            <div id="errorMessage" class="error-message"></div>
-            <div id="successMessage" class="success-message"></div>
-            
-            <div class="mb-3">
-                <label for="email" class="form-label">Email Address</label>
-                <input type="email" class="form-control" id="email" name="email" required 
-                       placeholder="Enter your email address">
-            </div>
-            
-            <div class="mb-3">
-                <label for="password" class="form-label">Password</label>
-                <input type="password" class="form-control" id="password" name="password" required 
-                       placeholder="Enter your password">
-            </div>
-            
-            <button type="submit" class="btn btn-auth" id="loginBtn">
-                <i class="fas fa-sign-in-alt me-2"></i>
-                Login
-            </button>
-            
-            <button type="button" class="btn btn-back" onclick="goBack()">
-                <i class="fas fa-arrow-left me-2"></i>
-                Back
-            </button>
-            
-            <div class="signup-link">
-                Don't have an account? <a href="signup.html">Sign up here</a>
-            </div>
-        </form>
-    </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        document.getElementById('loginForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            const loginBtn = document.getElementById('loginBtn');
-            const errorMessage = document.getElementById('errorMessage');
-            const successMessage = document.getElementById('successMessage');
-            
-            // Hide previous messages
-            errorMessage.style.display = 'none';
-            successMessage.style.display = 'none';
-            
-            // Show loading state
-            loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Logging in...';
-            loginBtn.disabled = true;
-            
-            try {
-                const response = await fetch('auth.php', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                    },
-                    body: `action=login&email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`
-                });
-                
-                const data = await response.json();
-                
-                if (data.success) {
-                    successMessage.textContent = 'Login successful! Redirecting...';
-                    successMessage.style.display = 'block';
-                    
-                    // Redirect to main app after success
-                    setTimeout(() => {
-                        window.location.href = 'index.html';
-                    }, 1000);
-                } else {
-                    errorMessage.textContent = data.message || 'Login failed. Please try again.';
-                    errorMessage.style.display = 'block';
-                }
-            } catch (error) {
-                console.error('Login error:', error);
-                errorMessage.textContent = 'An error occurred. Please try again.';
-                errorMessage.style.display = 'block';
-            } finally {
-                // Reset button state
-                loginBtn.innerHTML = '<i class="fas fa-sign-in-alt me-2"></i>Login';
-                loginBtn.disabled = false;
-            }
-        });
-        
-        function goBack() {
-            window.location.href = 'index.html';
+<div class="split">
+
+    <!-- ════════ LEFT: FORM ════════ -->
+    <div class="left-panel">
+        <div class="form-inner">
+
+            <a href="index.html" class="auth-logo">
+                <div class="logo-mk">MK</div>
+                <span class="brand-name">finder</span>
+            </a>
+
+            <div class="heading">
+                <h1>Welcome <em>Back</em></h1>
+                <p>Sign in to continue your bird discovery journey</p>
+            </div>
+            <div class="accent-bar"></div>
+
+            <!-- Alerts -->
+            <div class="alert-box err" id="errBox">
+                <i class="fas fa-exclamation-circle" style="margin-top:2px;flex-shrink:0;"></i>
+                <span id="errTxt"></span>
+            </div>
+            <div class="alert-box ok" id="okBox">
+                <i class="fas fa-check-circle" style="margin-top:2px;flex-shrink:0;"></i>
+                <span id="okTxt"></span>
+            </div>
+
+            <form id="loginForm" novalidate>
+
+                <label class="lbl">Email Address</label>
+                <div class="field">
+                    <i class="fas fa-envelope ficon"></i>
+                    <input type="email" id="email" placeholder="you@example.com" required autocomplete="email">
+                </div>
+
+                <label class="lbl">Password</label>
+                <div class="field">
+                    <i class="fas fa-lock ficon"></i>
+                    <input type="password" id="password" placeholder="Enter your password" required>
+                    <button type="button" class="pwd-btn" onclick="togglePwd('password',this)">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </div>
+
+                <div class="row-extra">
+                    <label class="check-label">
+                        <input type="checkbox" id="rememberMe"> Remember me
+                    </label>
+                    <a href="#" class="forgot">Forgot password?</a>
+                </div>
+
+                <button type="submit" class="btn-primary-custom" id="loginBtn">
+                    <i class="fas fa-sign-in-alt me-2"></i>Sign In
+                </button>
+                <button type="button" class="btn-ghost" onclick="window.location.href='index.html'">
+                    <i class="fas fa-arrow-left me-1"></i> Back to Home
+                </button>
+
+            </form>
+
+            <div class="switch-txt">
+                Don't have an account?
+                <a href="signup.html">Create one free →</a>
+            </div>
+
+        </div>
+    </div><!-- /left-panel -->
+
+    <!-- ════════ RIGHT: IMAGE ════════ -->
+    <div class="right-panel">
+        <div class="bg-photo"></div>
+        <div class="overlay"></div>
+
+        <!-- Floating dots -->
+        <div class="fdots">
+            <div class="fdot"></div><div class="fdot"></div>
+            <div class="fdot"></div><div class="fdot"></div>
+        </div>
+
+        <!-- Large bird silhouette watermark -->
+        <svg class="bird-silhouette" width="500" height="500" viewBox="0 0 200 200" fill="white" xmlns="http://www.w3.org/2000/svg">
+            <path d="M100 80 C80 60 40 50 10 70 C40 65 70 75 90 100 C70 95 45 100 30 120 C55 105 80 108 100 130 C120 108 145 105 170 120 C155 100 130 95 110 100 C130 75 160 65 190 70 C160 50 120 60 100 80Z"/>
+        </svg>
+
+        <!-- Stat pills -->
+        <div class="stat-pills">
+            <div class="pill">
+                <div class="pill-ico"><i class="fas fa-feather-alt"></i></div>
+                <div>
+                    <div class="pill-val">500+ Species</div>
+                    <div class="pill-lbl">In our database</div>
+                </div>
+            </div>
+            <div class="pill">
+                <div class="pill-ico"><i class="fas fa-brain"></i></div>
+                <div>
+                    <div class="pill-val">98% Accuracy</div>
+                    <div class="pill-lbl">AI Identification</div>
+                </div>
+            </div>
+            <div class="pill">
+                <div class="pill-ico"><i class="fas fa-bolt"></i></div>
+                <div>
+                    <div class="pill-val">&lt; 3 Seconds</div>
+                    <div class="pill-lbl">Avg. response time</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom text -->
+        <div class="img-content">
+            <div class="img-tag">
+                <i class="fas fa-feather-alt"></i>&nbsp;AI-Powered
+            </div>
+            <div class="img-quote">
+                Identify any bird,<br><em>instantly.</em>
+            </div>
+            <p class="img-sub">
+                Upload a photo and let our AI recognize the species — complete with habitat, behavior, and conservation status.
+            </p>
+        </div>
+    </div><!-- /right-panel -->
+
+</div>
+
+<script>
+    document.getElementById('email').focus();
+
+    function togglePwd(id, btn) {
+        const f  = document.getElementById(id);
+        const ic = btn.querySelector('i');
+        if (f.type === 'password') {
+            f.type = 'text';
+            ic.classList.replace('fa-eye','fa-eye-slash');
+        } else {
+            f.type = 'password';
+            ic.classList.replace('fa-eye-slash','fa-eye');
         }
-        
-        // Auto-focus email field
-        document.getElementById('email').focus();
-    </script>
+    }
+
+    function showErr(msg) {
+        document.getElementById('errTxt').textContent = msg;
+        document.getElementById('errBox').style.display = 'flex';
+        document.getElementById('okBox').style.display  = 'none';
+    }
+    function showOk(msg) {
+        document.getElementById('okTxt').textContent  = msg;
+        document.getElementById('okBox').style.display  = 'flex';
+        document.getElementById('errBox').style.display = 'none';
+    }
+
+    document.getElementById('loginForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const email    = document.getElementById('email').value.trim();
+        const password = document.getElementById('password').value;
+        const btn      = document.getElementById('loginBtn');
+
+        if (!email || !password) { showErr('Please fill in all fields.'); return; }
+
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Signing in…';
+        btn.disabled  = true;
+
+        try {
+            const res  = await fetch('auth.php', {
+                method : 'POST',
+                headers: { 'Content-Type':'application/x-www-form-urlencoded' },
+                body   : `action=login&email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`
+            });
+            const data = await res.json();
+
+            if (data.success) {
+                showOk('Login successful! Redirecting…');
+                setTimeout(() => window.location.href = data.is_admin ? 'admin.php' : 'index.html', 1200);
+            } else {
+                showErr(data.message || 'Invalid email or password.');
+                btn.innerHTML = '<i class="fas fa-sign-in-alt me-2"></i>Sign In';
+                btn.disabled  = false;
+            }
+        } catch {
+            showErr('Could not connect. Make sure XAMPP is running.');
+            btn.innerHTML = '<i class="fas fa-sign-in-alt me-2"></i>Sign In';
+            btn.disabled  = false;
+        }
+    });
+</script>
 </body>
 </html>

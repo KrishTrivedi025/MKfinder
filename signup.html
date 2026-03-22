@@ -3,324 +3,616 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign Up - MKfinder</title>
+    <title>Sign Up – MKfinder</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link href="styles.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
+
     <style>
-        body {
-            background: linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%);
-            min-height: 100vh;
+        *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+        :root {
+            --primary:       #2d6a4f;
+            --primary-light: #40916c;
+            --accent:        #74c69d;
+            --bg-dark:       #0d1b2a;
+            --text-muted:    rgba(255,255,255,0.45);
+            --border:        rgba(116,198,157,0.18);
+            --transition:    all 0.3s cubic-bezier(0.4,0,0.2,1);
+        }
+
+        html, body { height:100%; font-family:'Inter',sans-serif; }
+        body { overflow-x:hidden; overflow-y:auto; }
+
+        /* ── SPLIT LAYOUT ── */
+        .split { display:flex; min-height:100vh; }
+
+        /* ───────────────────────────────────
+           LEFT PANEL — FORM
+        ─────────────────────────────────── */
+        .left-panel {
+            width: 48%;
+            min-width: 440px;
+            background: var(--bg-dark);
             display: flex;
-            align-items: center;
+            flex-direction: column;
             justify-content: center;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            padding: 20px 0;
+            align-items: center;
+            padding: 52px 60px;
+            position: relative;
+            z-index: 2;
         }
-        
-        .auth-container {
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-            padding: 40px 35px;
-            width: 100%;
-            max-width: 420px;
-            backdrop-filter: blur(10px);
+        .left-panel::before {
+            content:'';
+            position:absolute; top:-120px; left:-120px;
+            width:380px; height:380px;
+            background:radial-gradient(circle,rgba(64,145,108,.2) 0%,transparent 70%);
+            pointer-events:none;
         }
-        
+        .left-panel::after {
+            content:'';
+            position:absolute; bottom:-80px; right:-60px;
+            width:260px; height:260px;
+            background:radial-gradient(circle,rgba(116,198,157,.1) 0%,transparent 70%);
+            pointer-events:none;
+        }
+
+        .form-inner { width:100%; max-width:400px; position:relative; z-index:1; }
+
+        /* Logo */
         .auth-logo {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 25px;
+            display:flex; align-items:center; gap:10px;
+            margin-bottom:32px; text-decoration:none;
         }
-        
         .logo-mk {
-            background: #4CAF50;
-            color: white;
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            font-size: 18px;
-            margin-right: 10px;
+            background:linear-gradient(135deg,var(--primary-light),var(--accent));
+            color:#fff; font-weight:800; font-size:.95rem;
+            padding:7px 11px; border-radius:10px; letter-spacing:1px;
         }
-        
         .brand-name {
-            font-size: 28px;
-            font-weight: 600;
-            color: #333;
+            font-family:'Playfair Display',serif;
+            font-size:1.6rem; color:#fff; font-weight:700;
         }
-        
-        .auth-title {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 30px;
-            font-size: 24px;
-            font-weight: 600;
-            color: #333;
+
+        /* Heading */
+        .heading { margin-bottom:24px; }
+        .heading h1 {
+            font-size:1.7rem; font-weight:700; color:#fff;
+            line-height:1.2; margin-bottom:8px;
         }
-        
-        .auth-title i {
-            margin-right: 10px;
-            color: #4CAF50;
+        .heading h1 em { color:var(--accent); font-style:normal; }
+        .heading p { font-size:.875rem; color:var(--text-muted); }
+
+        .accent-bar {
+            width:40px; height:3px;
+            background:linear-gradient(90deg,var(--primary-light),var(--accent));
+            border-radius:2px; margin-bottom:22px;
         }
-        
-        .form-label {
-            font-weight: 500;
-            color: #555;
-            margin-bottom: 8px;
+
+        /* Perks row */
+        .perks {
+            display:flex; gap:16px; flex-wrap:wrap;
+            margin-bottom:22px;
         }
-        
-        .form-control {
-            border: 2px solid #e0e0e0;
-            border-radius: 10px;
-            padding: 12px 15px;
-            font-size: 16px;
-            transition: all 0.3s ease;
-            margin-bottom: 5px;
+        .perk {
+            display:flex; align-items:center; gap:5px;
+            font-size:.75rem; color:rgba(116,198,157,.65);
         }
-        
-        .form-control:focus {
-            border-color: #4CAF50;
-            box-shadow: 0 0 0 0.2rem rgba(76, 175, 80, 0.25);
+        .perk i { font-size:.65rem; color:var(--accent); }
+
+        /* Labels */
+        label.lbl {
+            display:block; font-size:.77rem; font-weight:600;
+            text-transform:uppercase; letter-spacing:.6px;
+            color:var(--text-muted); margin-bottom:6px;
         }
-        
-        .form-text {
-            font-size: 13px;
-            color: #666;
-            margin-bottom: 15px;
-            margin-top: 5px;
+
+        /* Two-col row */
+        .two-col { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+
+        /* Fields */
+        .field { position:relative; margin-bottom:18px; }
+        .field .ficon {
+            position:absolute; left:14px; top:50%; transform:translateY(-50%);
+            color:rgba(116,198,157,.5); font-size:.82rem;
+            pointer-events:none; z-index:1;
         }
-        
-        .btn-auth {
-            background: #4CAF50;
-            border: none;
-            border-radius: 10px;
-            padding: 12px 25px;
-            font-size: 16px;
-            font-weight: 600;
-            color: white;
-            width: 100%;
-            transition: all 0.3s ease;
-            margin-bottom: 15px;
-            margin-top: 10px;
+        .field input {
+            width:100%;
+            background:rgba(255,255,255,.05);
+            border:1.5px solid var(--border);
+            border-radius:11px;
+            padding:12px 42px 12px 40px;
+            font-size:.88rem; color:#fff;
+            font-family:'Inter',sans-serif;
+            outline:none; transition:var(--transition);
         }
-        
-        .btn-auth:hover {
-            background: #45a049;
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+        .field input::placeholder { color:rgba(255,255,255,.2); }
+        .field input:focus {
+            border-color:rgba(116,198,157,.5);
+            background:rgba(255,255,255,.07);
+            box-shadow:0 0 0 3px rgba(116,198,157,.1);
         }
-        
-        .btn-back {
-            background: transparent;
-            border: 2px solid #e0e0e0;
-            border-radius: 10px;
-            padding: 12px 25px;
-            font-size: 16px;
-            font-weight: 500;
-            color: #666;
-            width: 100%;
-            transition: all 0.3s ease;
+        .field input.is-err { border-color:rgba(248,113,113,.5) !important; }
+        .pwd-btn {
+            position:absolute; right:13px; top:50%; transform:translateY(-50%);
+            background:none; border:none; color:rgba(255,255,255,.28);
+            cursor:pointer; font-size:.82rem; padding:0; transition:color .2s; z-index:1;
         }
-        
-        .btn-back:hover {
-            border-color: #4CAF50;
-            color: #4CAF50;
-            background: rgba(76, 175, 80, 0.05);
+        .pwd-btn:hover { color:var(--accent); }
+
+        /* Strength bar */
+        .strength-wrap { margin-top:-12px; margin-bottom:14px; }
+        .strength-track {
+            height:3px; background:rgba(255,255,255,.08);
+            border-radius:2px; overflow:hidden;
         }
-        
-        .error-message {
-            background: #ffebee;
-            border: 1px solid #ef5350;
-            border-radius: 8px;
-            padding: 12px;
-            margin-bottom: 20px;
-            color: #c62828;
-            font-size: 14px;
-            display: none;
+        .strength-fill {
+            height:100%; width:0%; border-radius:2px;
+            transition:width .3s, background .3s;
         }
-        
-        .success-message {
-            background: #e8f5e8;
-            border: 1px solid #4CAF50;
-            border-radius: 8px;
-            padding: 12px;
-            margin-bottom: 20px;
-            color: #2e7d32;
-            font-size: 14px;
-            display: none;
+        .strength-lbl { font-size:.72rem; margin-top:4px; color:rgba(255,255,255,.3); }
+
+        /* Terms */
+        .terms-row {
+            display:flex; align-items:flex-start; gap:9px;
+            margin-bottom:20px;
         }
-        
-        .login-link {
-            text-align: center;
-            margin-top: 20px;
+        .terms-row input[type=checkbox] {
+            accent-color:var(--primary-light);
+            width:14px; height:14px; flex-shrink:0; margin-top:3px; cursor:pointer;
         }
-        
-        .login-link a {
-            color: #4CAF50;
-            text-decoration: none;
-            font-weight: 500;
+        .terms-txt { font-size:.8rem; color:rgba(255,255,255,.38); line-height:1.5; }
+        .terms-txt a { color:rgba(116,198,157,.7); text-decoration:none; }
+        .terms-txt a:hover { color:var(--accent); }
+
+        /* Buttons */
+        .btn-primary-custom {
+            width:100%; padding:14px; border:none;
+            border-radius:12px;
+            background:linear-gradient(135deg,var(--primary-light) 0%,#52b788 100%);
+            color:#fff; font-size:.92rem; font-weight:600;
+            font-family:'Inter',sans-serif; cursor:pointer;
+            position:relative; overflow:hidden;
+            transition:var(--transition); letter-spacing:.3px;
         }
-        
-        .login-link a:hover {
-            text-decoration: underline;
+        .btn-primary-custom::after {
+            content:'';
+            position:absolute; inset:0;
+            background:linear-gradient(90deg,transparent,rgba(255,255,255,.08),transparent);
+            transform:translateX(-100%); transition:transform .5s;
         }
-        
-        .mb-3 {
-            margin-bottom: 18px !important;
+        .btn-primary-custom:hover::after { transform:translateX(100%); }
+        .btn-primary-custom:hover { transform:translateY(-2px); box-shadow:0 10px 28px rgba(64,145,108,.4); }
+        .btn-primary-custom:active { transform:translateY(0); }
+        .btn-primary-custom:disabled { opacity:.55; transform:none; cursor:not-allowed; }
+
+        .btn-ghost {
+            width:100%; padding:12px; margin-top:10px;
+            border:1.5px solid rgba(116,198,157,.18);
+            border-radius:12px; background:transparent;
+            color:var(--text-muted); font-size:.84rem;
+            font-family:'Inter',sans-serif; cursor:pointer;
+            transition:var(--transition);
+        }
+        .btn-ghost:hover {
+            border-color:rgba(116,198,157,.38);
+            color:var(--accent); background:rgba(116,198,157,.05);
+        }
+
+        /* Alerts */
+        .alert-box {
+            display:none; align-items:flex-start; gap:9px;
+            border-radius:10px; padding:11px 14px;
+            font-size:.82rem; margin-bottom:16px; line-height:1.5;
+        }
+        .alert-box.err {
+            background:rgba(248,113,113,.1);
+            border:1px solid rgba(248,113,113,.28);
+            color:#fca5a5;
+        }
+        .alert-box.ok {
+            background:rgba(116,198,157,.1);
+            border:1px solid rgba(116,198,157,.28);
+            color:var(--accent);
+        }
+
+        /* Switch link */
+        .switch-txt {
+            text-align:center; margin-top:22px;
+            font-size:.84rem; color:var(--text-muted);
+        }
+        .switch-txt a { color:var(--accent); font-weight:600; text-decoration:none; margin-left:4px; }
+        .switch-txt a:hover { text-decoration:underline; }
+
+        /* ───────────────────────────────────
+           RIGHT PANEL — IMAGE
+        ─────────────────────────────────── */
+        .right-panel {
+            flex:1; position:sticky; top:0;
+            height:100vh; overflow:hidden;
+            background:#071320;
+        }
+        .right-panel .bg-photo {
+            position:absolute; inset:0;
+            background:
+                url('https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1400&q=85&fit=crop')
+                center center / cover no-repeat;
+            transform:scale(1.05);
+            transition:transform 14s ease;
+        }
+        .right-panel:hover .bg-photo { transform:scale(1.0); }
+
+        .right-panel .overlay {
+            position:absolute; inset:0;
+            background:
+                linear-gradient(to right,  rgba(13,27,42,.65) 0%, rgba(13,27,42,.1) 100%),
+                linear-gradient(to top,    rgba(13,27,42,.8)  0%, transparent 55%);
+        }
+
+        /* Floating feature cards */
+        .feature-cards {
+            position:absolute; top:50%; right:40px;
+            transform:translateY(-50%);
+            display:flex; flex-direction:column; gap:12px; z-index:2;
+        }
+        .feat-card {
+            background:rgba(13,27,42,.7);
+            border:1px solid rgba(116,198,157,.2);
+            border-radius:14px; padding:14px 18px;
+            backdrop-filter:blur(14px);
+            display:flex; align-items:center; gap:13px;
+            min-width:200px;
+            animation:slideInRight .5s ease both;
+        }
+        .feat-card:nth-child(1){ animation-delay:.1s; }
+        .feat-card:nth-child(2){ animation-delay:.25s; }
+        .feat-card:nth-child(3){ animation-delay:.4s; }
+        @keyframes slideInRight {
+            from{ opacity:0; transform:translateX(35px); }
+            to  { opacity:1; transform:translateX(0); }
+        }
+        .feat-ico {
+            width:38px; height:38px; border-radius:10px;
+            background:linear-gradient(135deg,var(--primary-light),var(--accent));
+            display:flex; align-items:center; justify-content:center;
+            font-size:.9rem; color:#fff; flex-shrink:0;
+        }
+        .feat-val { font-size:.95rem; font-weight:700; color:#fff; line-height:1.2; }
+        .feat-lbl { font-size:.74rem; color:rgba(255,255,255,.45); }
+
+        /* Bird silhouette watermark */
+        .bird-wm {
+            position:absolute; top:50%; left:50%; z-index:1;
+            transform:translate(-50%,-50%);
+            opacity:.05; pointer-events:none;
+            animation:birdDrift 12s ease-in-out infinite;
+        }
+        @keyframes birdDrift {
+            0%,100%{ transform:translate(-50%,-50%) rotate(-3deg) scale(1); }
+            50%    { transform:translate(-46%,-54%) rotate(3deg)  scale(1.05); }
+        }
+
+        /* Floating dots */
+        .fdots { position:absolute; inset:0; pointer-events:none; z-index:1; }
+        .fdot {
+            position:absolute; width:5px; height:5px;
+            background:var(--accent); border-radius:50%;
+            opacity:0; animation:fdotAnim 7s ease-in-out infinite;
+        }
+        .fdot:nth-child(1){ top:20%; left:18%; animation-delay:0s; }
+        .fdot:nth-child(2){ top:38%; left:55%; animation-delay:2.2s; }
+        .fdot:nth-child(3){ top:62%; left:25%; animation-delay:4.4s; }
+        .fdot:nth-child(4){ top:75%; left:70%; animation-delay:1.1s; }
+        @keyframes fdotAnim {
+            0%,100%{ opacity:0; transform:scale(0) translateY(0); }
+            30%    { opacity:.6; transform:scale(1) translateY(-10px); }
+            70%    { opacity:.2; transform:scale(.8) translateY(-35px); }
+        }
+
+        /* Bottom quote */
+        .img-content {
+            position:absolute; bottom:48px; left:48px; right:220px; z-index:2;
+            animation:fadeUp .8s ease both;
+        }
+        @keyframes fadeUp {
+            from{ opacity:0; transform:translateY(20px); }
+            to  { opacity:1; transform:translateY(0);    }
+        }
+        .img-tag {
+            display:inline-flex; align-items:center; gap:7px;
+            background:rgba(116,198,157,.15);
+            border:1px solid rgba(116,198,157,.3);
+            border-radius:20px; padding:5px 14px;
+            font-size:.74rem; font-weight:600; color:var(--accent);
+            letter-spacing:.5px; text-transform:uppercase;
+            margin-bottom:12px; backdrop-filter:blur(8px);
+        }
+        .img-quote {
+            font-family:'Playfair Display',serif;
+            font-size:1.85rem; font-weight:700; color:#fff;
+            line-height:1.28; margin-bottom:10px;
+            text-shadow:0 2px 20px rgba(0,0,0,.5);
+        }
+        .img-quote em { color:var(--accent); font-style:normal; }
+        .img-sub { font-size:.84rem; color:rgba(255,255,255,.48); line-height:1.6; max-width:300px; }
+
+        /* ── RESPONSIVE ── */
+        @media(max-width:960px){
+            .right-panel{ display:none; }
+            .left-panel { width:100%; min-width:unset; padding:40px 28px; }
+        }
+        @media(max-width:480px){
+            .left-panel{ padding:28px 18px; }
+            .two-col { grid-template-columns:1fr; }
         }
     </style>
 </head>
 <body>
-    <div class="auth-container">
-        <div class="auth-logo">
-            <div class="logo-mk">MK</div>
-            <span class="brand-name">finder</span>
-        </div>
-        
-        <div class="auth-title">
-            <i class="fas fa-user-plus"></i>
-            Create Account
-        </div>
-        
-        <form id="signupForm">
-            <div id="errorMessage" class="error-message"></div>
-            <div id="successMessage" class="success-message"></div>
-            
-            <div class="mb-3">
-                <label for="email" class="form-label">Email Address</label>
-                <input type="email" class="form-control" id="email" name="email" required 
-                       placeholder="Enter your email address">
-            </div>
-            
-            <div class="mb-3">
-                <label for="phone" class="form-label">Phone Number</label>
-                <input type="tel" class="form-control" id="phone" name="phone" required 
-                       placeholder="+1234567890">
-            </div>
-            
-            <div class="mb-3">
-                <label for="password" class="form-label">Password</label>
-                <input type="password" class="form-control" id="password" name="password" required 
-                       placeholder="Create a password" minlength="6">
-                <div class="form-text">Password must be at least 6 characters long</div>
-            </div>
-            
-            <div class="mb-3">
-                <label for="confirmPassword" class="form-label">Confirm Password</label>
-                <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" required 
-                       placeholder="Confirm your password">
-            </div>
-            
-            <button type="submit" class="btn btn-auth" id="signupBtn">
-                <i class="fas fa-user-plus me-2"></i>
-                Create Account
-            </button>
-            
-            <button type="button" class="btn btn-back" onclick="goBack()">
-                <i class="fas fa-arrow-left me-2"></i>
-                Back
-            </button>
-            
-            <div class="login-link">
-                Already have an account? <a href="login.html">Login here</a>
-            </div>
-        </form>
-    </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        document.getElementById('signupForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            const email = document.getElementById('email').value;
-            const phone = document.getElementById('phone').value;
-            const password = document.getElementById('password').value;
-            const confirmPassword = document.getElementById('confirmPassword').value;
-            const signupBtn = document.getElementById('signupBtn');
-            const errorMessage = document.getElementById('errorMessage');
-            const successMessage = document.getElementById('successMessage');
-            
-            // Hide previous messages
-            errorMessage.style.display = 'none';
-            successMessage.style.display = 'none';
-            
-            // Validate passwords match
-            if (password !== confirmPassword) {
-                errorMessage.textContent = 'Passwords do not match.';
-                errorMessage.style.display = 'block';
-                return;
-            }
-            
-            // Validate password length
-            if (password.length < 6) {
-                errorMessage.textContent = 'Password must be at least 6 characters long.';
-                errorMessage.style.display = 'block';
-                return;
-            }
-            
-            // Show loading state
-            signupBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Creating Account...';
-            signupBtn.disabled = true;
-            
-            try {
-                const response = await fetch('auth.php', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                    },
-                    body: `action=signup&email=${encodeURIComponent(email)}&phone=${encodeURIComponent(phone)}&password=${encodeURIComponent(password)}&confirmPassword=${encodeURIComponent(confirmPassword)}`
-                });
-                
-                const data = await response.json();
-                
-                if (data.success) {
-                    successMessage.textContent = 'Account created successfully! Redirecting to login...';
-                    successMessage.style.display = 'block';
-                    
-                    // Redirect to login page after success
-                    setTimeout(() => {
-                        window.location.href = 'login.html';
-                    }, 2000);
-                } else {
-                    errorMessage.textContent = data.message || 'Signup failed. Please try again.';
-                    errorMessage.style.display = 'block';
-                }
-            } catch (error) {
-                console.error('Signup error:', error);
-                errorMessage.textContent = 'An error occurred. Please try again.';
-                errorMessage.style.display = 'block';
-            } finally {
-                // Reset button state
-                signupBtn.innerHTML = '<i class="fas fa-user-plus me-2"></i>Create Account';
-                signupBtn.disabled = false;
-            }
-        });
-        
-        function goBack() {
-            window.location.href = 'index.html';
+<div class="split">
+
+    <!-- ════════ LEFT: FORM ════════ -->
+    <div class="left-panel">
+        <div class="form-inner">
+
+            <a href="index.html" class="auth-logo">
+                <div class="logo-mk">MK</div>
+                <span class="brand-name">finder</span>
+            </a>
+
+            <div class="heading">
+                <h1>Join <em>MKfinder</em></h1>
+                <p>Create your free account and start identifying birds today</p>
+            </div>
+            <div class="accent-bar"></div>
+
+            <!-- Perks -->
+            <div class="perks">
+                <div class="perk"><i class="fas fa-check-circle"></i> Free forever</div>
+                <div class="perk"><i class="fas fa-check-circle"></i> Save identifications</div>
+                <div class="perk"><i class="fas fa-check-circle"></i> Community gallery</div>
+            </div>
+
+            <!-- Alerts -->
+            <div class="alert-box err" id="errBox">
+                <i class="fas fa-exclamation-circle" style="margin-top:2px;flex-shrink:0;"></i>
+                <span id="errTxt"></span>
+            </div>
+            <div class="alert-box ok" id="okBox">
+                <i class="fas fa-check-circle" style="margin-top:2px;flex-shrink:0;"></i>
+                <span id="okTxt"></span>
+            </div>
+
+            <form id="signupForm" novalidate>
+
+                <!-- First / Last name -->
+                <div class="two-col">
+                    <div>
+                        <label class="lbl">First Name</label>
+                        <div class="field">
+                            <i class="fas fa-user ficon"></i>
+                            <input type="text" id="firstName" placeholder="John" required>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="lbl">Last Name</label>
+                        <div class="field">
+                            <i class="fas fa-user ficon"></i>
+                            <input type="text" id="lastName" placeholder="Doe">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Email -->
+                <label class="lbl">Email Address</label>
+                <div class="field">
+                    <i class="fas fa-envelope ficon"></i>
+                    <input type="email" id="email" placeholder="you@example.com" required autocomplete="email">
+                </div>
+
+                <!-- Phone -->
+                <label class="lbl">Phone Number</label>
+                <div class="field">
+                    <i class="fas fa-phone ficon"></i>
+                    <input type="tel" id="phone" placeholder="+1 234 567 8900">
+                </div>
+
+                <!-- Password -->
+                <label class="lbl">Password</label>
+                <div class="field">
+                    <i class="fas fa-lock ficon"></i>
+                    <input type="password" id="password" placeholder="Min. 6 characters"
+                           required oninput="updateStrength(this.value)">
+                    <button type="button" class="pwd-btn" onclick="togglePwd('password',this)">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </div>
+                <div class="strength-wrap">
+                    <div class="strength-track"><div class="strength-fill" id="sFill"></div></div>
+                    <div class="strength-lbl" id="sLbl"></div>
+                </div>
+
+                <!-- Confirm Password -->
+                <label class="lbl">Confirm Password</label>
+                <div class="field">
+                    <i class="fas fa-lock ficon"></i>
+                    <input type="password" id="confirmPassword" placeholder="Repeat your password" required>
+                    <button type="button" class="pwd-btn" onclick="togglePwd('confirmPassword',this)">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </div>
+
+                <!-- Terms -->
+                <div class="terms-row">
+                    <input type="checkbox" id="agreeTerms" required>
+                    <div class="terms-txt">
+                        I agree to MKfinder's <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-primary-custom" id="signupBtn">
+                    <i class="fas fa-user-plus me-2"></i>Create Account
+                </button>
+                <button type="button" class="btn-ghost" onclick="window.location.href='index.html'">
+                    <i class="fas fa-arrow-left me-1"></i> Back to Home
+                </button>
+
+            </form>
+
+            <div class="switch-txt">
+                Already have an account?
+                <a href="login.html">Sign in here →</a>
+            </div>
+
+        </div>
+    </div><!-- /left-panel -->
+
+    <!-- ════════ RIGHT: IMAGE ════════ -->
+    <div class="right-panel">
+        <div class="bg-photo"></div>
+        <div class="overlay"></div>
+
+        <!-- Floating dots -->
+        <div class="fdots">
+            <div class="fdot"></div><div class="fdot"></div>
+            <div class="fdot"></div><div class="fdot"></div>
+        </div>
+
+        <!-- Bird silhouette watermark -->
+        <svg class="bird-wm" width="550" height="550" viewBox="0 0 200 200" fill="white" xmlns="http://www.w3.org/2000/svg">
+            <path d="M100 80 C80 60 40 50 10 70 C40 65 70 75 90 100 C70 95 45 100 30 120 C55 105 80 108 100 130 C120 108 145 105 170 120 C155 100 130 95 110 100 C130 75 160 65 190 70 C160 50 120 60 100 80Z"/>
+        </svg>
+
+        <!-- Feature cards -->
+        <div class="feature-cards">
+            <div class="feat-card">
+                <div class="feat-ico"><i class="fas fa-camera"></i></div>
+                <div>
+                    <div class="feat-val">Snap & Identify</div>
+                    <div class="feat-lbl">Any bird photo</div>
+                </div>
+            </div>
+            <div class="feat-card">
+                <div class="feat-ico"><i class="fas fa-images"></i></div>
+                <div>
+                    <div class="feat-val">Personal Gallery</div>
+                    <div class="feat-lbl">Save all findings</div>
+                </div>
+            </div>
+            <div class="feat-card">
+                <div class="feat-ico"><i class="fas fa-globe"></i></div>
+                <div>
+                    <div class="feat-val">Global Community</div>
+                    <div class="feat-lbl">Share sightings</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom text -->
+        <div class="img-content">
+            <div class="img-tag">
+                <i class="fas fa-feather-alt"></i>&nbsp;Free to Join
+            </div>
+            <div class="img-quote">
+                Your bird journey<br><em>starts here.</em>
+            </div>
+            <p class="img-sub">
+                Join thousands of bird enthusiasts using AI to explore and document avian species worldwide.
+            </p>
+        </div>
+    </div><!-- /right-panel -->
+
+</div>
+
+<script>
+    function togglePwd(id, btn) {
+        const f  = document.getElementById(id);
+        const ic = btn.querySelector('i');
+        if (f.type === 'password') {
+            f.type = 'text'; ic.classList.replace('fa-eye','fa-eye-slash');
+        } else {
+            f.type = 'password'; ic.classList.replace('fa-eye-slash','fa-eye');
         }
-        
-        // Auto-focus email field
-        document.getElementById('email').focus();
-        
-        // Real-time password confirmation validation
-        document.getElementById('confirmPassword').addEventListener('input', function() {
-            const password = document.getElementById('password').value;
-            const confirmPassword = this.value;
-            
-            if (confirmPassword && password !== confirmPassword) {
-                this.style.borderColor = '#ef5350';
+    }
+
+    function updateStrength(val) {
+        let score = 0;
+        if (val.length >= 6)              score++;
+        if (val.length >= 10)             score++;
+        if (/[A-Z]/.test(val))            score++;
+        if (/[0-9]/.test(val))            score++;
+        if (/[^A-Za-z0-9]/.test(val))     score++;
+        const lvls = [
+            { pct:'0%',   color:'transparent',  lbl:'' },
+            { pct:'25%',  color:'#f87171',       lbl:'Weak' },
+            { pct:'50%',  color:'#fb923c',       lbl:'Fair' },
+            { pct:'75%',  color:'#facc15',       lbl:'Good' },
+            { pct:'100%', color:'#74c69d',       lbl:'Strong' },
+        ];
+        const l = lvls[Math.min(score, 4)];
+        const fill = document.getElementById('sFill');
+        const lbl  = document.getElementById('sLbl');
+        fill.style.width      = l.pct;
+        fill.style.background = l.color;
+        lbl.textContent       = l.lbl;
+        lbl.style.color       = l.color;
+    }
+
+    function showErr(msg) {
+        document.getElementById('errTxt').textContent = msg;
+        document.getElementById('errBox').style.display = 'flex';
+        document.getElementById('okBox').style.display  = 'none';
+    }
+    function showOk(msg) {
+        document.getElementById('okTxt').textContent  = msg;
+        document.getElementById('okBox').style.display  = 'flex';
+        document.getElementById('errBox').style.display = 'none';
+    }
+
+    document.getElementById('signupForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        const firstName      = document.getElementById('firstName').value.trim();
+        const lastName       = document.getElementById('lastName').value.trim();
+        const email          = document.getElementById('email').value.trim();
+        const phone          = document.getElementById('phone').value.trim();
+        const password       = document.getElementById('password').value;
+        const confirmPassword= document.getElementById('confirmPassword').value;
+        const agreeTerms     = document.getElementById('agreeTerms').checked;
+        const btn            = document.getElementById('signupBtn');
+
+        if (!firstName)              { showErr('Please enter your first name.');        return; }
+        if (!email)                  { showErr('Please enter your email address.');     return; }
+        if (password.length < 6)     { showErr('Password must be at least 6 characters.'); return; }
+        if (password !== confirmPassword){ showErr('Passwords do not match.');          return; }
+        if (!agreeTerms)             { showErr('Please agree to the Terms of Service.'); return; }
+
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Creating account…';
+        btn.disabled  = true;
+
+        try {
+            const res  = await fetch('auth.php', {
+                method : 'POST',
+                headers: { 'Content-Type':'application/x-www-form-urlencoded' },
+                body   : `action=signup&email=${encodeURIComponent(email)}&phone=${encodeURIComponent(phone)}&password=${encodeURIComponent(password)}&confirmPassword=${encodeURIComponent(confirmPassword)}&firstName=${encodeURIComponent(firstName)}&lastName=${encodeURIComponent(lastName)}`
+            });
+            const data = await res.json();
+
+            if (data.success) {
+                showOk('Account created! Redirecting to login…');
+                setTimeout(() => window.location.href = 'login.html', 1500);
             } else {
-                this.style.borderColor = '#e0e0e0';
+                showErr(data.message || 'Registration failed. Please try again.');
+                btn.innerHTML = '<i class="fas fa-user-plus me-2"></i>Create Account';
+                btn.disabled  = false;
             }
-        });
-    </script>
+        } catch {
+            showErr('Could not connect. Make sure XAMPP is running.');
+            btn.innerHTML = '<i class="fas fa-user-plus me-2"></i>Create Account';
+            btn.disabled  = false;
+        }
+    });
+</script>
 </body>
 </html>

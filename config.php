@@ -1,79 +1,84 @@
 <?php
 /**
- * MKfinder Configuration File
- * Contains all configuration settings for the bird identification system
+ * MKfinder Configuration — XAMPP / MySQL
  */
 
-// Error reporting
 error_reporting(E_ALL);
-ini_set('display_errors', 1);
+ini_set('display_errors', 0);      // hide errors from browser, log them instead
 
-// Set timezone
 date_default_timezone_set('UTC');
 
-// Database configuration (JSON file-based)
-define('DB_FILE', __DIR__ . '/database.json');
+// ──────────────────────────────────────
+// DATABASE — XAMPP defaults
+// ──────────────────────────────────────
+define('DB_HOST', 'localhost');
+define('DB_PORT', '3306');
+define('DB_NAME', 'mkfinder');
+define('DB_USER', 'root');
+define('DB_PASS', '');              // blank = default XAMPP password
 
-// Upload configuration
+// ──────────────────────────────────────
+// UPLOAD SETTINGS
+// ──────────────────────────────────────
 define('UPLOAD_DIR', __DIR__ . '/uploads/');
-define('MAX_UPLOAD_SIZE', 5 * 1024 * 1024); // 5MB
-define('ALLOWED_EXTENSIONS', ['jpg', 'jpeg', 'png', 'webp']);
-define('ALLOWED_MIME_TYPES', ['image/jpeg', 'image/png', 'image/webp']);
+define('MAX_UPLOAD_SIZE', 5 * 1024 * 1024);   // 5 MB
+define('ALLOWED_EXTENSIONS', ['jpg','jpeg','png','webp']);
+define('ALLOWED_MIME_TYPES',  ['image/jpeg','image/png','image/webp']);
 
-// Bird species configuration
+// ──────────────────────────────────────
+// SPECIES
+// ──────────────────────────────────────
 define('SUPPORTED_SPECIES', [
     'American Robin',
-    'Blue Jay',
-    'Northern Cardinal'
+    'Blue Grosbeak',
+    'Northern Cardinal',
 ]);
 
-// API Configuration
+// ──────────────────────────────────────
+// BIRD ID API (leave empty = demo mode)
+// ──────────────────────────────────────
 define('IDENTIFICATION_API_KEY', getenv('BIRD_IDENTIFICATION_API_KEY') ?: '');
 define('IDENTIFICATION_API_URL', getenv('BIRD_IDENTIFICATION_API_URL') ?: '');
 
-// Security settings
-define('CSRF_TOKEN_NAME', 'mkfinder_token');
-define('SESSION_NAME', 'mkfinder_session');
+// ──────────────────────────────────────
+// SESSION / SECURITY
+// ──────────────────────────────────────
+define('SESSION_NAME',       'mkfinder_session');
+define('CSRF_TOKEN_NAME',    'mkfinder_token');
+define('SESSION_LIFETIME',   60 * 60 * 24 * 7);  // 7 days in seconds
 
-// Response messages
+// ──────────────────────────────────────
+// RESPONSE MESSAGES
+// ──────────────────────────────────────
 define('MESSAGES', [
-    'UPLOAD_SUCCESS' => 'Image uploaded successfully.',
-    'UPLOAD_ERROR' => 'Failed to upload image. Please try again.',
-    'INVALID_FILE_TYPE' => 'Invalid file type. Please upload JPG, PNG, or WEBP images only.',
-    'FILE_TOO_LARGE' => 'File size exceeds the maximum limit of 5MB.',
+    'UPLOAD_SUCCESS'       => 'Image uploaded successfully.',
+    'UPLOAD_ERROR'         => 'Failed to upload image. Please try again.',
+    'INVALID_FILE_TYPE'    => 'Invalid file type. Please upload JPG, PNG, or WEBP images only.',
+    'FILE_TOO_LARGE'       => 'File size exceeds the 5 MB limit.',
     'IDENTIFICATION_ERROR' => 'Failed to identify bird species. Please try again.',
-    'NO_SPECIES_FOUND' => 'No bird species detected in the uploaded image.',
-    'SPECIES_NOT_SUPPORTED' => 'The detected species is not currently supported by our system.',
-    'NETWORK_ERROR' => 'Network error occurred. Please check your connection.',
-    'INVALID_REQUEST' => 'Invalid request format.',
-    'MISSING_FILE' => 'No image file provided.',
-    'DATABASE_ERROR' => 'Database operation failed.',
-    'SPECIES_NOT_FOUND' => 'Species information not found.'
+    'NO_SPECIES_FOUND'     => 'No bird species detected in the uploaded image.',
+    'SPECIES_NOT_SUPPORTED'=> 'The detected species is not currently supported.',
+    'NETWORK_ERROR'        => 'Network error. Please check your connection.',
+    'INVALID_REQUEST'      => 'Invalid request format.',
+    'MISSING_FILE'         => 'No image file provided.',
+    'DATABASE_ERROR'       => 'Database operation failed.',
+    'SPECIES_NOT_FOUND'    => 'Species information not found.',
 ]);
 
-// Ensure upload directory exists
+// Ensure uploads folder exists
 if (!file_exists(UPLOAD_DIR)) {
     mkdir(UPLOAD_DIR, 0755, true);
 }
 
-/**
- * Get configuration value
- */
-function getConfig($key, $default = null) {
-    return defined($key) ? constant($key) : $default;
-}
+// ──────────────────────────────────────
+// HELPER FUNCTIONS
+// ──────────────────────────────────────
 
-/**
- * Get message by key
- */
 function getMessage($key) {
-    $messages = MESSAGES;
-    return isset($messages[$key]) ? $messages[$key] : 'Unknown error occurred.';
+    $msgs = MESSAGES;
+    return $msgs[$key] ?? 'Unknown error.';
 }
 
-/**
- * Initialize session if not started
- */
 function initSession() {
     if (session_status() === PHP_SESSION_NONE) {
         session_name(SESSION_NAME);
@@ -81,9 +86,6 @@ function initSession() {
     }
 }
 
-/**
- * Generate CSRF token
- */
 function generateCSRFToken() {
     initSession();
     if (!isset($_SESSION[CSRF_TOKEN_NAME])) {
@@ -92,167 +94,60 @@ function generateCSRFToken() {
     return $_SESSION[CSRF_TOKEN_NAME];
 }
 
-/**
- * Verify CSRF token
- */
 function verifyCSRFToken($token) {
     initSession();
     return isset($_SESSION[CSRF_TOKEN_NAME]) && hash_equals($_SESSION[CSRF_TOKEN_NAME], $token);
 }
 
-/**
- * Sanitize input data
- */
 function sanitizeInput($data) {
-    if (is_array($data)) {
-        return array_map('sanitizeInput', $data);
-    }
+    if (is_array($data)) return array_map('sanitizeInput', $data);
     return htmlspecialchars(trim($data), ENT_QUOTES, 'UTF-8');
 }
 
-/**
- * Validate file upload
- */
 function validateFileUpload($file) {
     $errors = [];
-
-    // Check if file was uploaded
     if (!isset($file) || $file['error'] === UPLOAD_ERR_NO_FILE) {
-        $errors[] = getMessage('MISSING_FILE');
-        return $errors;
+        $errors[] = getMessage('MISSING_FILE'); return $errors;
     }
+    if ($file['error'] !== UPLOAD_ERR_OK)        { $errors[] = getMessage('UPLOAD_ERROR');      return $errors; }
+    if ($file['size'] > MAX_UPLOAD_SIZE)          { $errors[] = getMessage('FILE_TOO_LARGE'); }
 
-    // Check for upload errors
-    if ($file['error'] !== UPLOAD_ERR_OK) {
-        $errors[] = getMessage('UPLOAD_ERROR');
-        return $errors;
+    $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+    if (!in_array($ext, ALLOWED_EXTENSIONS))      { $errors[] = getMessage('INVALID_FILE_TYPE'); }
+
+    if (function_exists('finfo_open')) {
+        $finfo    = finfo_open(FILEINFO_MIME_TYPE);
+        $mimeType = finfo_file($finfo, $file['tmp_name']);
+        finfo_close($finfo);
+        if (!in_array($mimeType, ALLOWED_MIME_TYPES)) { $errors[] = getMessage('INVALID_FILE_TYPE'); }
     }
-
-    // Check file size
-    if ($file['size'] > MAX_UPLOAD_SIZE) {
-        $errors[] = getMessage('FILE_TOO_LARGE');
-    }
-
-    // Check file extension
-    $fileExtension = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
-    if (!in_array($fileExtension, ALLOWED_EXTENSIONS)) {
-        $errors[] = getMessage('INVALID_FILE_TYPE');
-    }
-
-    // Check MIME type
-    $finfo = finfo_open(FILEINFO_MIME_TYPE);
-    $mimeType = finfo_file($finfo, $file['tmp_name']);
-    finfo_close($finfo);
-    
-    if (!in_array($mimeType, ALLOWED_MIME_TYPES)) {
-        $errors[] = getMessage('INVALID_FILE_TYPE');
-    }
-
     return $errors;
 }
 
-/**
- * Generate unique filename
- */
 function generateUniqueFilename($originalName) {
-    $extension = strtolower(pathinfo($originalName, PATHINFO_EXTENSION));
-    $timestamp = time();
-    $random = bin2hex(random_bytes(8));
-    return "bird_{$timestamp}_{$random}.{$extension}";
+    $ext = strtolower(pathinfo($originalName, PATHINFO_EXTENSION));
+    return 'bird_' . time() . '_' . bin2hex(random_bytes(6)) . '.' . $ext;
 }
 
-/**
- * Send JSON response
- */
 function sendJSONResponse($data, $httpCode = 200) {
     http_response_code($httpCode);
     header('Content-Type: application/json');
-    echo json_encode($data, JSON_PRETTY_PRINT);
+    echo json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
     exit;
 }
 
-/**
- * Log error message
- */
 function logError($message, $context = []) {
-    $logEntry = [
+    $entry = [
         'timestamp' => date('Y-m-d H:i:s'),
-        'message' => $message,
-        'context' => $context
+        'message'   => $message,
+        'context'   => $context,
     ];
-    
-    error_log(json_encode($logEntry) . PHP_EOL, 3, __DIR__ . '/error.log');
+    error_log(json_encode($entry) . PHP_EOL, 3, __DIR__ . '/error.log');
 }
 
-/**
- * Legacy database functions - kept for backward compatibility
- * Now redirects to PostgreSQL database
- */
-function getLegacyDatabase() {
-    if (!file_exists(DB_FILE)) {
-        return ['species' => [], 'identifications' => []];
-    }
-    
-    $data = file_get_contents(DB_FILE);
-    $decoded = json_decode($data, true);
-    
-    if (json_last_error() !== JSON_ERROR_NONE) {
-        logError('Failed to decode database JSON: ' . json_last_error_msg());
-        return ['species' => [], 'identifications' => []];
-    }
-    
-    return $decoded;
-}
-
-/**
- * Legacy save database function
- */
-function saveLegacyDatabase($data) {
-    $json = json_encode($data, JSON_PRETTY_PRINT);
-    if (json_last_error() !== JSON_ERROR_NONE) {
-        logError('Failed to encode database JSON: ' . json_last_error_msg());
-        return false;
-    }
-    
-    $result = file_put_contents(DB_FILE, $json, LOCK_EX);
-    if ($result === false) {
-        logError('Failed to write database file');
-        return false;
-    }
-    
-    return true;
-}
-
-/**
- * Check if user is logged in
- */
 function isLoggedIn() {
     initSession();
-    
-    if (!isset($_SESSION['user_id']) || !isset($_SESSION['session_id'])) {
-        return false;
-    }
-    
-    try {
-        $db = getDatabase();
-        $connection = $db->getConnection();
-        
-        // Check if session is valid
-        $checkSession = "
-            SELECT s.session_id, u.user_id, u.email, u.is_active
-            FROM user_sessions s
-            JOIN users u ON s.user_id = u.user_id
-            WHERE s.session_id = ? AND s.expires_at > NOW() AND u.is_active = 1
-        ";
-        $stmt = $connection->prepare($checkSession);
-        $stmt->execute([$_SESSION['session_id']]);
-        $session = $stmt->fetch();
-        
-        return $session !== false;
-        
-    } catch (Exception $e) {
-        logError('isLoggedIn check failed', ['error' => $e->getMessage()]);
-        return false;
-    }
+    return isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true
+           && !empty($_SESSION['user_id']);
 }
 ?>

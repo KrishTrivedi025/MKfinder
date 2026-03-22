@@ -1,7 +1,7 @@
 <?php
 /**
- * MKfinder Database Connection Handler
- * Manages PostgreSQL database connections and operations
+ * MKfinder — database.php (UPDATED)
+ * Added user-specific methods for personal gallery
  */
 
 require_once __DIR__ . '/config.php';
@@ -9,74 +9,50 @@ require_once __DIR__ . '/config.php';
 class Database {
     private static $instance = null;
     private $connection = null;
-    
-    private function __construct() {
-        $this->connect();
-    }
-    
-    /**
-     * Get database instance (Singleton pattern)
-     */
+
+    private function __construct() { $this->connect(); }
+
     public static function getInstance() {
-        if (self::$instance === null) {
-            self::$instance = new Database();
-        }
+        if (self::$instance === null) self::$instance = new Database();
         return self::$instance;
     }
-    
-    /**
-     * Connect to MySQL database
-     */
+
     private function connect() {
         try {
-            // Try DATABASE_URL first (for production/cloud environments)
             $databaseUrl = getenv('DATABASE_URL');
-            
             if (!empty($databaseUrl)) {
-                // Parse DATABASE_URL
-                $dbInfo = parse_url($databaseUrl);
-                $host = $dbInfo['host'];
-                $port = $dbInfo['port'] ?? 3306;
-                $dbname = ltrim($dbInfo['path'], '/');
-                $user = $dbInfo['user'];
+                $dbInfo   = parse_url($databaseUrl);
+                $host     = $dbInfo['host'];
+                $port     = $dbInfo['port'] ?? 3306;
+                $dbname   = ltrim($dbInfo['path'], '/');
+                $user     = $dbInfo['user'];
                 $password = $dbInfo['pass'];
             } else {
-                // Fallback to individual environment variables or defaults for local development
-                $host = getenv('DB_HOST') ?: 'localhost';
-                $port = getenv('DB_PORT') ?: 3306;
-                $dbname = getenv('DB_NAME') ?: 'mkfinder';
-                $user = getenv('DB_USER') ?: 'root';
+                $host     = getenv('DB_HOST') ?: 'localhost';
+                $port     = getenv('DB_PORT') ?: 3306;
+                $dbname   = getenv('DB_NAME') ?: 'mkfinder';
+                $user     = getenv('DB_USER') ?: 'root';
                 $password = getenv('DB_PASS') ?: '';
             }
-            
+
             $dsn = "mysql:host={$host};port={$port};dbname={$dbname};charset=utf8mb4";
-            
             $this->connection = new PDO($dsn, $user, $password, [
-                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
                 PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-                PDO::ATTR_EMULATE_PREPARES => false,
+                PDO::ATTR_EMULATE_PREPARES   => false,
                 PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8mb4"
             ]);
-            
         } catch (Exception $e) {
             logError('Database connection failed', ['error' => $e->getMessage()]);
             throw new Exception('Database connection failed: ' . $e->getMessage());
         }
     }
-    
-    /**
-     * Get database connection
-     */
+
     public function getConnection() {
-        if ($this->connection === null) {
-            $this->connect();
-        }
+        if ($this->connection === null) $this->connect();
         return $this->connection;
     }
-    
-    /**
-     * Execute query and return results
-     */
+
     public function query($sql, $params = []) {
         try {
             $stmt = $this->connection->prepare($sql);
@@ -84,198 +60,219 @@ class Database {
             return $stmt;
         } catch (PDOException $e) {
             logError('Database query failed', [
-                'sql' => $sql,
+                'sql'    => $sql,
                 'params' => $params,
-                'error' => $e->getMessage()
+                'error'  => $e->getMessage()
             ]);
             throw new Exception('Database query failed: ' . $e->getMessage());
         }
     }
-    
-    /**
-     * Get all species
-     */
+
+    // ─────────────────────────────────────────────────────────
+    // SPECIES
+    // ─────────────────────────────────────────────────────────
+
     public function getAllSpecies() {
-        $stmt = $this->query("SELECT * FROM species ORDER BY name");
+        // Only show admin-approved species in public pages
+        // Falls back gracefully if status column doesn't exist yet
+        try {
+            $stmt = $this->query(
+                "SELECT * FROM species WHERE status = 'approved' ORDER BY name"
+            );
+        } catch (Exception $e) {
+            // status column not added yet — show all (backwards compat)
+            $stmt = $this->query("SELECT * FROM species ORDER BY name");
+        }
         $species = $stmt->fetchAll();
-        
-        // Convert JSONB characteristics to array
         foreach ($species as &$spec) {
-            if (isset($spec['characteristics'])) {
+            if (isset($spec['characteristics']))
                 $spec['characteristics'] = json_decode($spec['characteristics'], true);
-            }
         }
-        
         return $species;
     }
-    
-    /**
-     * Get species by name
-     */
+
     public function getSpeciesByName($name) {
-        $stmt = $this->query("SELECT * FROM species WHERE name = ?", [$name]);
+        $stmt    = $this->query("SELECT * FROM species WHERE name = ?", [$name]);
         $species = $stmt->fetch();
-        
-        if ($species && isset($species['characteristics'])) {
+        if ($species && isset($species['characteristics']))
             $species['characteristics'] = json_decode($species['characteristics'], true);
-        }
-        
         return $species;
     }
-    
-    /**
-     * Save upload record
-     */
+
+    // ─────────────────────────────────────────────────────────
+    // UPLOADS
+    // ─────────────────────────────────────────────────────────
+
     public function saveUpload($uploadData) {
-        $sql = "INSERT INTO uploads (upload_id, filename, original_name, file_size, mime_type, file_path, status) 
-                VALUES (?, ?, ?, ?, ?, ?, ?) RETURNING id";
-        
-        $stmt = $this->query($sql, [
+        $sql = "INSERT INTO uploads
+                    (upload_id, user_id, filename, original_name,
+                     file_size, mime_type, file_path, status)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+
+        $this->query($sql, [
             $uploadData['upload_id'],
+            $uploadData['user_id']       ?? null,
             $uploadData['filename'],
             $uploadData['original_name'],
-            $uploadData['file_size'],
-            $uploadData['mime_type'],
-            $uploadData['file_path'],
-            $uploadData['status'] ?? 'uploaded'
+            $uploadData['file_size']     ?? null,
+            $uploadData['mime_type']     ?? null,
+            $uploadData['file_path']     ?? null,
+            $uploadData['status']        ?? 'uploaded',
         ]);
-        
-        return $stmt->fetch()['id'];
+
+        return $this->connection->lastInsertId();
     }
-    
-    /**
-     * Save identification record
-     */
-    public function saveIdentification($identificationData) {
-        $sql = "INSERT INTO identifications 
-                (identification_id, upload_id, filename, original_name, species_name, confidence, file_size, processing_time_ms) 
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?) RETURNING id";
-        
-        $stmt = $this->query($sql, [
-            $identificationData['identification_id'],
-            $identificationData['upload_id'] ?? null,
-            $identificationData['filename'],
-            $identificationData['original_name'],
-            $identificationData['species_name'],
-            $identificationData['confidence'],
-            $identificationData['file_size'] ?? null,
-            $identificationData['processing_time_ms'] ?? null
-        ]);
-        
-        return $stmt->fetch()['id'];
+
+    // ─────────────────────────────────────────────────────────
+    // IDENTIFICATIONS
+    // ─────────────────────────────────────────────────────────
+
+    public function saveIdentification($data) {
+        $sql = "INSERT INTO identifications
+        (identification_id, upload_id, user_id, filename,
+         original_name, species_name, confidence,
+         file_size, processing_time_ms, location)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+$this->query($sql, [
+    $data['identification_id'],
+    $data['upload_id']           ?? null,
+    $data['user_id']             ?? null,
+    $data['filename'],
+    $data['original_name'],
+    $data['species_name'],
+    $data['confidence'],
+    $data['file_size']           ?? null,
+    $data['processing_time_ms']  ?? null,
+    $data['location']            ?? null,
+]);
+
+        return $this->connection->lastInsertId();
     }
-    
-    /**
-     * Get recent identifications
-     */
-    public function getRecentIdentifications($limit = 50, $offset = 0, $speciesFilter = null) {
-        $sql = "SELECT i.*, u.file_path as upload_path 
-                FROM identifications i 
-                LEFT JOIN uploads u ON i.upload_id = u.upload_id";
-        
-        $params = [];
-        
+
+    // ─────────────────────────────────────────────────────────
+    // USER-SPECIFIC GALLERY (personal — only their own uploads)
+    // ─────────────────────────────────────────────────────────
+
+    public function getUserIdentifications($userId, $limit = 50, $offset = 0, $speciesFilter = null) {
+        $params = [$userId];
+        $sql    = "SELECT i.*, u.file_path AS upload_path
+                   FROM identifications i
+                   LEFT JOIN uploads u ON i.upload_id = u.upload_id
+                   WHERE i.user_id = ?";
+
         if ($speciesFilter) {
-            $sql .= " WHERE i.species_name = ?";
+            $sql     .= " AND i.species_name = ?";
             $params[] = $speciesFilter;
         }
-        
-        $sql .= " ORDER BY i.identification_time DESC LIMIT ? OFFSET ?";
-        $params[] = $limit;
-        $params[] = $offset;
-        
-        $stmt = $this->query($sql, $params);
-        return $stmt->fetchAll();
+
+        $sql     .= " ORDER BY i.identification_time DESC LIMIT ? OFFSET ?";
+        $params[] = (int)$limit;
+        $params[] = (int)$offset;
+
+        return $this->query($sql, $params)->fetchAll();
     }
-    
-    /**
-     * Count total identifications
-     */
-    public function countIdentifications($speciesFilter = null) {
-        $sql = "SELECT COUNT(*) as total FROM identifications";
-        $params = [];
-        
+
+    public function countUserIdentifications($userId, $speciesFilter = null) {
+        $params = [$userId];
+        $sql    = "SELECT COUNT(*) AS total FROM identifications WHERE user_id = ?";
+
         if ($speciesFilter) {
-            $sql .= " WHERE species_name = ?";
+            $sql     .= " AND species_name = ?";
             $params[] = $speciesFilter;
         }
-        
-        $stmt = $this->query($sql, $params);
-        return $stmt->fetch()['total'];
+
+        return (int)$this->query($sql, $params)->fetch()['total'];
     }
-    
-    /**
-     * Get species statistics
-     */
-    public function getSpeciesStatistics() {
-        $sql = "SELECT 
+
+    public function getUserSpeciesStatistics($userId) {
+        $sql = "SELECT
                     species_name,
-                    COUNT(*) as identification_count,
-                    AVG(confidence) as avg_confidence,
-                    MAX(confidence) as max_confidence,
-                    MIN(confidence) as min_confidence
-                FROM identifications 
-                GROUP BY species_name 
+                    COUNT(*)        AS identification_count,
+                    AVG(confidence) AS avg_confidence,
+                    MAX(confidence) AS max_confidence,
+                    MIN(confidence) AS min_confidence
+                FROM identifications
+                WHERE user_id = ?
+                GROUP BY species_name
                 ORDER BY identification_count DESC";
-        
-        $stmt = $this->query($sql);
-        return $stmt->fetchAll();
+
+        return $this->query($sql, [$userId])->fetchAll();
     }
-    
-    /**
-     * Close connection
-     */
-    public function close() {
-        $this->connection = null;
+
+    // ─────────────────────────────────────────────────────────
+    // LEGACY — all users combined (kept for compatibility)
+    // ─────────────────────────────────────────────────────────
+
+    public function getRecentIdentifications($limit = 50, $offset = 0, $speciesFilter = null) {
+        $params = [];
+        $sql    = "SELECT i.*, u.file_path AS upload_path
+                   FROM identifications i
+                   LEFT JOIN uploads u ON i.upload_id = u.upload_id";
+
+        if ($speciesFilter) {
+            $sql     .= " WHERE i.species_name = ?";
+            $params[] = $speciesFilter;
+        }
+
+        $sql     .= " ORDER BY i.identification_time DESC LIMIT ? OFFSET ?";
+        $params[] = (int)$limit;
+        $params[] = (int)$offset;
+
+        return $this->query($sql, $params)->fetchAll();
     }
+
+    public function countIdentifications($speciesFilter = null) {
+        $params = [];
+        $sql    = "SELECT COUNT(*) AS total FROM identifications";
+
+        if ($speciesFilter) {
+            $sql     .= " WHERE species_name = ?";
+            $params[] = $speciesFilter;
+        }
+
+        return (int)$this->query($sql, $params)->fetch()['total'];
+    }
+
+    public function getSpeciesStatistics() {
+        $sql = "SELECT
+                    species_name,
+                    COUNT(*)        AS identification_count,
+                    AVG(confidence) AS avg_confidence,
+                    MAX(confidence) AS max_confidence,
+                    MIN(confidence) AS min_confidence
+                FROM identifications
+                GROUP BY species_name
+                ORDER BY identification_count DESC";
+
+        return $this->query($sql)->fetchAll();
+    }
+
+    public function close() { $this->connection = null; }
 }
 
-/**
- * Get database instance (wrapper for compatibility)
- */
-function getDatabase() {
-    return Database::getInstance();
-}
+function getDatabase()       { return Database::getInstance(); }
 
-/**
- * Get all species from database
- */
 function getAllSpeciesFromDB() {
-    try {
-        $db = getDatabase();
-        return $db->getAllSpecies();
-    } catch (Exception $e) {
-        logError('Failed to get all species from database', ['error' => $e->getMessage()]);
+    try   { return getDatabase()->getAllSpecies(); }
+    catch (Exception $e) {
+        logError('getAllSpecies failed', ['error' => $e->getMessage()]);
         return [];
     }
 }
 
-/**
- * Get species info from database
- */
-function getSpeciesInfoFromDB($speciesName) {
-    try {
-        $db = getDatabase();
-        return $db->getSpeciesByName($speciesName);
-    } catch (Exception $e) {
-        logError('Failed to get species info from database', [
-            'species' => $speciesName,
-            'error' => $e->getMessage()
-        ]);
+function getSpeciesInfoFromDB($name) {
+    try   { return getDatabase()->getSpeciesByName($name); }
+    catch (Exception $e) {
+        logError('getSpeciesByName failed', ['error' => $e->getMessage()]);
         return null;
     }
 }
 
-/**
- * Test database connection
- */
 function testDatabaseConnection() {
-    try {
-        $db = getDatabase();
-        $stmt = $db->query("SELECT 1 as test");
-        return $stmt->fetch()['test'] === 1;
-    } catch (Exception $e) {
-        logError('Database connection test failed', ['error' => $e->getMessage()]);
+    try   { return getDatabase()->query("SELECT 1 AS test")->fetch()['test'] == 1; }
+    catch (Exception $e) {
+        logError('DB test failed', ['error' => $e->getMessage()]);
         return false;
     }
 }

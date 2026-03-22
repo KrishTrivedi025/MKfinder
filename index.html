@@ -9,338 +9,504 @@
     <link href="styles.css" rel="stylesheet">
 </head>
 <body>
-    <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top">
+
+    <!-- ===== NAVBAR ===== -->
+    <nav class="navbar navbar-expand-lg fixed-top" id="mainNav">
         <div class="container">
             <a class="navbar-brand d-flex align-items-center" href="index.html">
                 <div class="logo-mk me-2">MK</div>
                 <span class="brand-name">finder</span>
             </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto" id="navLinks">
-                    <!-- Always visible navigation -->
+                <ul class="navbar-nav ms-auto align-items-center gap-1" id="navLinks">
                     <li class="nav-item">
                         <a class="nav-link active" href="index.html">Home</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="gallery.php">Gallery</a>
+                        <a class="nav-link" href="gallery.php">
+                            <i class="fas fa-images me-1"></i>Gallery
+                        </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="species.php">Species Info</a>
+                        <a class="nav-link" href="species.php">
+                            <i class="fas fa-feather me-1"></i>Species
+                        </a>
                     </li>
-                    
-                    <!-- Authentication Navigation (shown when not logged in) -->
+                    <li class="nav-item">
+                        <a class="nav-link" href="community.php">
+                            <i class="fas fa-globe me-1"></i>Bird Explorer
+                        </a>
+                    </li>
+                    <!-- Guest Nav -->
                     <li class="nav-item guest-nav">
                         <a class="nav-link" href="login.html">Login</a>
                     </li>
-                    <li class="nav-item guest-nav">
-                        <a class="nav-link" href="signup.html">Sign Up</a>
+                    <li class="nav-item guest-nav ms-2">
+                        <a class="btn-hero-primary px-4 py-2" href="signup.html"
+                           style="font-size:0.88rem;text-decoration:none;">
+                            <i class="fas fa-user-plus me-1"></i>Sign Up
+                        </a>
                     </li>
-                    
-                    <!-- User info (shown when logged in) -->
-                    <li class="nav-item user-nav" style="display: none;">
-                        <span class="nav-link text-white-50" id="userEmail"></span>
+                    <!-- User Nav (shown after login) -->
+                    <li class="nav-item user-nav" style="display:none;">
+                        <a class="nav-link" id="userNavLink" href="index.html"
+                           style="color:#74c69d; font-size:0.85rem; text-decoration:none;">
+                            <i class="fas fa-user-circle me-1"></i>
+                            <span id="userDisplayName"></span>
+                        </a>
                     </li>
-                    <li class="nav-item user-nav" style="display: none;">
-                        <a class="nav-link" href="#" onclick="handleLogout(); return false;">Logout</a>
+                    <li class="nav-item user-nav ms-2" style="display:none;">
+                        <a class="nav-link" href="#"
+                           onclick="handleLogout(); return false;"
+                           style="color:#f87171;">
+                            <i class="fas fa-sign-out-alt me-1"></i>Logout
+                        </a>
                     </li>
                 </ul>
             </div>
         </div>
     </nav>
 
-    <!-- Authentication Section (Hidden by default, shown as modal) -->
-    <section id="auth-section" class="min-vh-100 d-flex align-items-center bg-primary" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 9999; background: rgba(44, 85, 48, 0.95);">
-        <button onclick="hideAuthModal()" style="position: absolute; top: 20px; right: 20px; background: white; border: none; border-radius: 50%; width: 40px; height: 40px; cursor: pointer; font-size: 24px; line-height: 1; z-index: 10000;">&times;</button>
+    <!-- ===== HERO SECTION ===== -->
+    <section class="hero-section" id="main-content">
+        <div class="floating-birds">
+            <div class="bird-dot"></div>
+            <div class="bird-dot"></div>
+            <div class="bird-dot"></div>
+            <div class="bird-dot"></div>
+            <div class="bird-dot"></div>
+        </div>
+
         <div class="container">
-            <div class="row justify-content-center">
-                <div class="col-lg-5">
-                    <!-- Welcome Card -->
-                    <div id="welcome-card" class="card shadow-lg border-0 mb-4">
-                        <div class="card-body text-center p-5">
-                            <div class="auth-logo mb-4">
-                                <div class="logo-mk me-2">MK</div>
-                                <span class="brand-name text-primary">finder</span>
+            <div class="row align-items-center g-5">
+
+                <!-- Left: Hero Text -->
+                <div class="col-lg-6 hero-content">
+                    <div class="hero-badge">
+                        <i class="fas fa-feather-alt"></i>
+                        AI-Powered Bird Identification
+                    </div>
+                    <h1 class="hero-title">
+                        Discover Every<br>
+                        <span class="highlight">Bird Species</span><br>
+                        Instantly
+                    </h1>
+                    <p class="hero-subtitle">
+                        Upload a photo of any bird and our advanced AI will identify the species
+                        in seconds — complete with habitat, behavior, and conservation status.
+                    </p>
+                    <div class="hero-cta">
+                        <a href="#upload-section" class="btn-hero-primary">
+                            <i class="fas fa-camera"></i>Try It Now
+                        </a>
+                        <a href="species.php" class="btn-hero-secondary">
+                            <i class="fas fa-book-open"></i>Browse Species
+                        </a>
+                    </div>
+                    <div class="hero-stats">
+                        <div class="hero-stat">
+                            <div class="number">500+</div>
+                            <div class="label">Bird Species</div>
+                        </div>
+                        <div class="hero-stat">
+                            <div class="number">98%</div>
+                            <div class="label">Accuracy</div>
+                        </div>
+                        <div class="hero-stat">
+                            <div class="number">&lt;3s</div>
+                            <div class="label">Avg Response</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right: Upload Card -->
+                <div class="col-lg-6" id="upload-section">
+                    <div class="upload-card-hero">
+                        <h4>
+                            <i class="fas fa-search me-2" style="color:var(--accent)"></i>
+                            Identify a Bird
+                        </h4>
+                        <p class="subtitle">Drop your image below and let AI do the rest</p>
+
+                        <!-- Upload Zone -->
+                        <div class="upload-zone" id="uploadArea">
+                            <div class="upload-icon-wrap">
+                                <i class="fas fa-cloud-upload-alt"></i>
                             </div>
-                            <p class="text-muted mb-4">Advanced Bird Species Identification System</p>
-                            <p class="lead text-dark mb-4">
-                                Upload bird images and get instant species identification with detailed information about each bird.
+                            <p>Drag &amp; drop your bird photo here</p>
+                            <small>or click to browse &nbsp;·&nbsp; JPG, PNG, WEBP &nbsp;·&nbsp; Max 5MB</small>
+                            <input type="file" id="imageInput" name="image"
+                                   accept=".jpg,.jpeg,.png,.webp" hidden>
+                        </div>
+
+                        <!-- Preview -->
+                        <div id="previewSection" style="display:none;" class="mt-3">
+                            <div class="image-preview mb-3">
+                                <img id="previewImage" src="" alt="Preview">
+                            </div>
+                            <div class="d-flex gap-2">
+                                <button type="button" id="identifyBtn" class="btn flex-fill">
+                                    <i class="fas fa-search me-2"></i>Identify Species
+                                </button>
+                                <button type="button" id="resetBtn" class="btn">
+                                    <i class="fas fa-redo"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Loading -->
+                        <div id="loadingSection" style="display:none;" class="text-center py-4">
+                            <div class="spinner-border" role="status" style="color:var(--accent);"></div>
+                            <p id="loadingMainText" style="color:rgba(255,255,255,0.80);margin-top:14px;font-size:0.92rem;font-weight:600;font-family:'Playfair Display',serif;">
+                                Our AI is analyzing your image...
                             </p>
-                            <div class="d-grid gap-3">
-                                <button class="btn btn-primary btn-lg" onclick="showLoginForm()">
-                                    <i class="fas fa-sign-in-alt me-2"></i>
-                                    Login to Continue
-                                </button>
-                                <button class="btn btn-outline-primary btn-lg" onclick="showSignupForm()">
-                                    <i class="fas fa-user-plus me-2"></i>
-                                    Create New Account
-                                </button>
-                            </div>
+                            <p id="loadingSubText" style="color:rgba(255,255,255,0.45);margin-top:4px;font-size:0.78rem;font-style:italic;">
+                                "Every bird is a miracle of nature waiting to be discovered."
+                            </p>
                         </div>
-                    </div>
 
-                    <!-- Login Form -->
-                    <div id="login-card" class="card shadow-lg border-0" style="display: none;">
-                        <div class="card-body p-5">
-                            <div class="text-center mb-4">
-                                <div class="auth-logo-small mb-3">
-                                    <div class="logo-mk-small me-2">MK</div>
-                                    <span class="brand-name-small text-primary">finder</span>
-                                </div>
-                                <h2 class="text-center">
-                                    <i class="fas fa-sign-in-alt text-primary me-2"></i>
-                                    Welcome Back
-                                </h2>
+                        <!-- Results -->
+                        <div id="resultsSection" style="display:none;" class="mt-3">
+                            <div class="result-card">
+                                <div id="resultsContent"></div>
                             </div>
-                            <form id="loginForm">
-                                <div class="mb-4">
-                                    <label for="loginEmail" class="form-label">Email Address</label>
-                                    <input type="email" class="form-control form-control-lg" id="loginEmail" required>
-                                </div>
-                                <div class="mb-4">
-                                    <label for="loginPassword" class="form-label">Password</label>
-                                    <input type="password" class="form-control form-control-lg" id="loginPassword" required>
-                                </div>
-                                <div class="d-grid gap-3">
-                                    <button type="submit" class="btn btn-primary btn-lg">
-                                        <i class="fas fa-sign-in-alt me-2"></i>
-                                        Login
-                                    </button>
-                                    <button type="button" class="btn btn-outline-secondary" onclick="hideAuthModal()">
-                                        <i class="fas fa-times me-2"></i>
-                                        Cancel
-                                    </button>
-                                </div>
-                            </form>
-                            <div id="loginError" class="alert alert-danger mt-4" style="display: none;"></div>
                         </div>
-                    </div>
 
-                    <!-- Signup Form -->
-                    <div id="signup-card" class="card shadow-lg border-0" style="display: none;">
-                        <div class="card-body p-5">
-                            <div class="text-center mb-4">
-                                <div class="auth-logo-small mb-3">
-                                    <div class="logo-mk-small me-2">MK</div>
-                                    <span class="brand-name-small text-primary">finder</span>
-                                </div>
-                                <h2 class="text-center">
-                                    <i class="fas fa-user-plus text-primary me-2"></i>
-                                    Create Account
-                                </h2>
+                        <!-- Error -->
+                        <div id="errorSection" style="display:none;" class="mt-3">
+                            <div class="error-card">
+                                <i class="fas fa-exclamation-triangle me-2" style="color:#f87171;"></i>
+                                <span id="errorContent" style="color:rgba(255,255,255,0.8);font-size:0.9rem;"></span>
                             </div>
-                            <form id="signupForm">
-                                <div class="mb-4">
-                                    <label for="signupEmail" class="form-label">Email Address</label>
-                                    <input type="email" class="form-control form-control-lg" id="signupEmail" required>
-                                </div>
-                                <div class="mb-4">
-                                    <label for="signupPhone" class="form-label">Phone Number</label>
-                                    <input type="tel" class="form-control form-control-lg" id="signupPhone" placeholder="+1234567890" required>
-                                </div>
-                                <div class="mb-4">
-                                    <label for="signupPassword" class="form-label">Password</label>
-                                    <input type="password" class="form-control form-control-lg" id="signupPassword" minlength="6" required>
-                                    <div class="form-text">Password must be at least 6 characters long</div>
-                                </div>
-                                <div class="mb-4">
-                                    <label for="confirmPassword" class="form-label">Confirm Password</label>
-                                    <input type="password" class="form-control form-control-lg" id="confirmPassword" required>
-                                </div>
-                                <div class="d-grid gap-3">
-                                    <button type="submit" class="btn btn-primary btn-lg">
-                                        <i class="fas fa-user-plus me-2"></i>
-                                        Create Account
-                                    </button>
-                                    <button type="button" class="btn btn-outline-secondary" onclick="hideAuthModal()">
-                                        <i class="fas fa-times me-2"></i>
-                                        Cancel
-                                    </button>
-                                </div>
-                            </form>
-                            <div id="signupError" class="alert alert-danger mt-4" style="display: none;"></div>
                         </div>
+
+                        <!-- Login Prompt (guest tries to upload) -->
+                        <div id="loginPromptSection" style="display:none;" class="mt-3">
+                            <div style="background:rgba(116,198,157,0.08);border:1px solid rgba(116,198,157,0.2);
+                                        border-radius:14px;padding:22px;text-align:center;">
+                                <i class="fas fa-lock mb-2" style="font-size:1.5rem;color:var(--accent);display:block;"></i>
+                                <p style="color:rgba(255,255,255,0.75);margin-bottom:14px;font-size:0.9rem;">
+                                    Please log in to identify bird species
+                                </p>
+                                <div class="d-flex gap-2 justify-content-center flex-wrap">
+                                    <a href="login.html" class="btn-hero-primary px-3 py-2"
+                                       style="font-size:0.83rem;text-decoration:none;">
+                                        <i class="fas fa-sign-in-alt me-1"></i>Login
+                                    </a>
+                                    <a href="signup.html" class="btn-hero-secondary px-3 py-2"
+                                       style="font-size:0.83rem;text-decoration:none;">
+                                        <i class="fas fa-user-plus me-1"></i>Sign Up Free
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== FEATURES SECTION ===== -->
+    <section class="features-section">
+        <div class="container">
+            <div class="text-center mb-5">
+                <span class="section-label">Why MKfinder?</span>
+                <h2 class="section-title">Built for Bird Enthusiasts</h2>
+                <p class="section-subtitle">
+                    Everything you need to explore and learn about bird species around the world.
+                </p>
+            </div>
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="feature-card">
+                        <div class="feature-icon green"><i class="fas fa-brain"></i></div>
+                        <h5>AI-Powered Recognition</h5>
+                        <p>Advanced deep learning models trained on hundreds of thousands of bird images for pinpoint accuracy.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="feature-card">
+                        <div class="feature-icon blue"><i class="fas fa-bolt"></i></div>
+                        <h5>Instant Results</h5>
+                        <p>Get species identification in under 5 seconds with detailed info including habitat, diet, and behavior.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="feature-card">
+                        <div class="feature-icon orange"><i class="fas fa-database"></i></div>
+                        <h5>Vast Species Database</h5>
+                        <p>Access a rich database of 10+ bird species with scientific names, conservation status, and more.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="feature-card">
+                        <div class="feature-icon green"><i class="fas fa-images"></i></div>
+                        <h5>Community Gallery</h5>
+                        <p>Browse thousands of bird photos uploaded by the community. Share your own sightings too.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="feature-card">
+                        <div class="feature-icon blue"><i class="fas fa-shield-alt"></i></div>
+                        <h5>Conservation Info</h5>
+                        <p>Every result includes IUCN conservation status so you know which species need our protection.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="feature-card">
+                        <div class="feature-icon orange"><i class="fas fa-mobile-alt"></i></div>
+                        <h5>Works Everywhere</h5>
+                        <p>Fully responsive design works seamlessly on desktop, tablet, and mobile — identify birds anywhere.</p>
                     </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Main Application Section -->
-    <section id="main-app" style="display: block;">
-        <!-- Hero Section -->
-        <section class="hero-section">
-            <div class="container">
-                <div class="row align-items-center min-vh-100">
-                    <div class="col-lg-6">
-                        <h1 class="display-4 fw-bold text-white mb-4">
-                            Identify Bird Species with
-                            <span class="text-accent">MKfinder</span>
-                        </h1>
-                        <p class="lead text-white-50 mb-4">
-                            Upload an image of a bird and let our advanced identification system classify the species for you. 
-                            Currently supporting identification of three bird species with high accuracy.
-                        </p>
-                        <button class="btn btn-accent btn-lg" onclick="scrollToUpload()">
-                            <i class="fas fa-camera me-2"></i>
-                            Start Identifying
-                        </button>
+    <!-- ===== HOW IT WORKS ===== -->
+    <section class="how-it-works">
+        <div class="container" style="position:relative;z-index:2;">
+            <div class="text-center mb-5">
+                <span class="section-label"
+                      style="background:rgba(116,198,157,0.15);border-color:rgba(116,198,157,0.25);color:var(--accent);">
+                    Simple Process
+                </span>
+                <h2 class="section-title" style="color:white;">How It Works</h2>
+                <p class="section-subtitle" style="color:rgba(255,255,255,0.55);">
+                    Three simple steps to identify any bird species instantly.
+                </p>
+            </div>
+            <div class="row g-4 justify-content-center">
+                <div class="col-md-3 col-6">
+                    <div class="step-card">
+                        <div class="step-number">1</div>
+                        <h5>Upload Photo</h5>
+                        <p>Take or upload a clear photo of the bird you want to identify.</p>
                     </div>
-                    <div class="col-lg-6">
-                        <div class="hero-image">
-                            <i class="fas fa-dove fa-10x text-white-25"></i>
-                        </div>
+                </div>
+                <div class="col-md-3 col-6">
+                    <div class="step-card">
+                        <div class="step-number">2</div>
+                        <h5>AI Analysis</h5>
+                        <p>Our AI model analyzes the image using deep neural networks.</p>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6">
+                    <div class="step-card">
+                        <div class="step-number">3</div>
+                        <h5>Get Results</h5>
+                        <p>Receive full species info, habitat, diet, and conservation status.</p>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6">
+                    <div class="step-card">
+                        <div class="step-number">4</div>
+                        <h5>Save &amp; Share</h5>
+                        <p>Save your finding to the gallery and share with the community.</p>
                     </div>
                 </div>
             </div>
-        </section>
-
-        <!-- Upload Section -->
-        <section id="upload-section" class="py-5">
-            <div class="container">
-                <div class="row justify-content-center">
-                    <div class="col-lg-8">
-                        <div class="card shadow-lg border-0">
-                            <div class="card-body p-5">
-                                <h2 class="text-center mb-4">
-                                    <i class="fas fa-upload text-primary me-2"></i>
-                                    Upload Bird Image
-                                </h2>
-                                
-                                <!-- Upload Form -->
-                                <form id="uploadForm" enctype="multipart/form-data" class="mb-4">
-                                    <div class="upload-area" id="uploadArea">
-                                        <div class="upload-content">
-                                            <i class="fas fa-cloud-upload-alt fa-3x text-muted mb-3"></i>
-                                            <p class="text-muted mb-2">Drag and drop your bird image here</p>
-                                            <p class="text-muted small">or click to browse files</p>
-                                            <input type="file" id="imageInput" name="image" accept=".jpg,.jpeg,.png,.webp" hidden>
-                                        </div>
-                                    </div>
-                                    <div class="text-center mt-3">
-                                        <small class="text-muted">Supported formats: JPG, PNG, WEBP (Max size: 5MB)</small>
-                                    </div>
-                                </form>
-
-                                <!-- Preview Section -->
-                                <div id="previewSection" class="text-center" style="display: none;">
-                                    <div class="image-preview mb-3">
-                                        <img id="previewImage" src="" alt="Preview" class="img-fluid rounded">
-                                    </div>
-                                    <button type="button" id="identifyBtn" class="btn btn-primary btn-lg">
-                                        <i class="fas fa-search me-2"></i>
-                                        Identify Species
-                                    </button>
-                                    <button type="button" id="resetBtn" class="btn btn-outline-secondary ms-2">
-                                        <i class="fas fa-times me-2"></i>
-                                        Reset
-                                    </button>
-                                </div>
-
-                                <!-- Loading Section -->
-                                <div id="loadingSection" class="text-center" style="display: none;">
-                                    <div class="spinner-border text-primary mb-3" role="status">
-                                        <span class="visually-hidden">Loading...</span>
-                                    </div>
-                                    <p class="text-muted">Analyzing image...</p>
-                                </div>
-
-                                <!-- Results Section -->
-                                <div id="resultsSection" style="display: none;">
-                                    <div class="alert alert-success">
-                                        <h5 class="alert-heading">
-                                            <i class="fas fa-check-circle me-2"></i>
-                                            Identification Complete
-                                        </h5>
-                                        <div id="resultsContent"></div>
-                                    </div>
-                                </div>
-
-                                <!-- Error Section -->
-                                <div id="errorSection" style="display: none;">
-                                    <div class="alert alert-danger">
-                                        <h5 class="alert-heading">
-                                            <i class="fas fa-exclamation-triangle me-2"></i>
-                                            Error
-                                        </h5>
-                                        <div id="errorContent"></div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Features Section -->
-        <section class="py-5 bg-light">
-            <div class="container">
-                <div class="row">
-                    <div class="col-12 text-center mb-5">
-                        <h2 class="fw-bold">Why Choose MKfinder?</h2>
-                        <p class="text-muted">Advanced bird identification technology at your fingertips</p>
-                    </div>
-                </div>
-                <div class="row g-4">
-                    <div class="col-md-4">
-                        <div class="feature-card text-center p-4">
-                            <i class="fas fa-brain fa-3x text-primary mb-3"></i>
-                            <h5>AI-Powered Recognition</h5>
-                            <p class="text-muted">Advanced machine learning algorithms for accurate species identification</p>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="feature-card text-center p-4">
-                            <i class="fas fa-tachometer-alt fa-3x text-primary mb-3"></i>
-                            <h5>Fast Processing</h5>
-                            <p class="text-muted">Get identification results in seconds with our optimized processing system</p>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="feature-card text-center p-4">
-                            <i class="fas fa-database fa-3x text-primary mb-3"></i>
-                            <h5>Comprehensive Database</h5>
-                            <p class="text-muted">Extensive collection of bird species data for accurate identification</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Footer -->
-        <footer class="bg-dark text-white py-4">
-            <div class="container">
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="d-flex align-items-center mb-2">
-                            <div class="logo-mk me-2">MK</div>
-                            <span class="brand-name">finder</span>
-                        </div>
-                        <p class="text-muted small">Advanced bird species identification system</p>
-                    </div>
-                    <div class="col-md-6 text-md-end">
-                        <p class="text-muted small mb-0">&copy; 2025 MKfinder. All rights reserved.</p>
-                    </div>
-                </div>
-            </div>
-        </footer>
+        </div>
     </section>
 
-    <!-- Loading Overlay -->
-    <div id="loadingOverlay" class="loading-overlay" style="display: none;">
-        <div class="loading-spinner">
-            <div class="spinner-border text-primary" role="status">
-                <span class="visually-hidden">Loading...</span>
+    <!-- ===== FOOTER ===== -->
+    <footer class="site-footer">
+        <div class="container">
+            <div class="row g-4">
+                <div class="col-lg-4">
+                    <div class="footer-brand d-flex align-items-center gap-2 mb-3">
+                        <div class="logo-mk">MK</div>
+                        <span class="brand-name">finder</span>
+                    </div>
+                    <p class="footer-desc">
+                        Advanced AI-powered bird species identification. Helping birdwatchers
+                        and researchers explore avian biodiversity.
+                    </p>
+                </div>
+                <div class="col-lg-2 col-6 footer-links">
+                    <h6>Navigation</h6>
+                    <a href="index.html">Home</a>
+                    <a href="gallery.php">Gallery</a>
+                    <a href="species.php">Species</a>
+                    <a href="community.php">Bird Explorer</a>
+                </div>
+                <div class="col-lg-2 col-6 footer-links">
+                    <h6>Account</h6>
+                    <a href="login.html">Login</a>
+                    <a href="signup.html">Sign Up</a>
+                </div>
+                <div class="col-lg-4 footer-links">
+                    <h6>About</h6>
+                    <p style="color:rgba(255,255,255,0.35);font-size:0.85rem;line-height:1.7;">
+                        MKfinder uses cutting-edge machine learning to help you identify bird
+                        species from photos with high accuracy.
+                    </p>
+                </div>
             </div>
-            <p class="mt-3 text-white">Processing...</p>
+            <div class="footer-bottom d-flex flex-wrap justify-content-between align-items-center gap-2">
+                <span>&copy; 2025 MKfinder. All rights reserved.</span>
+                <span>Made with <i class="fas fa-heart" style="color:#f87171;"></i> for bird lovers</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay" style="display:none;">
+        <div class="loading-spinner">
+            <div class="spinner-border" role="status"></div>
+            <p class="mt-3" style="color:rgba(255,255,255,0.7);">Processing…</p>
         </div>
     </div>
 
+    <!-- ===== BEAUTIFUL LOGIN REQUIRED MODAL ===== -->
+    <div id="loginRequiredModal" style="display:none;position:fixed;inset:0;z-index:9999;
+         display:none;align-items:center;justify-content:center;padding:20px;">
+        <!-- Backdrop -->
+        <div onclick="closeLoginModal()" style="position:absolute;inset:0;
+             background:rgba(13,27,42,0.85);backdrop-filter:blur(6px);"></div>
+        <!-- Card -->
+        <div style="position:relative;background:linear-gradient(135deg,#0d1b2a,#0f2236);
+                    border:1px solid rgba(116,198,157,0.25);border-radius:24px;
+                    padding:40px 36px;max-width:420px;width:100%;text-align:center;
+                    box-shadow:0 32px 80px rgba(0,0,0,0.5);animation:modalIn .3s ease;">
+            <!-- Icon -->
+            <div style="width:72px;height:72px;border-radius:50%;margin:0 auto 20px;
+                         background:linear-gradient(135deg,rgba(64,145,108,.2),rgba(116,198,157,.1));
+                         border:2px solid rgba(116,198,157,.3);
+                         display:flex;align-items:center;justify-content:center;">
+                <i class="fas fa-lock" style="font-size:1.8rem;color:#74c69d;"></i>
+            </div>
+            <!-- Text -->
+            <h3 id="loginModalTitle" style="font-family:'Playfair Display',serif;font-size:1.5rem;
+                    font-weight:700;color:#fff;margin-bottom:10px;">Login Required</h3>
+            <p id="loginModalMsg" style="color:rgba(255,255,255,0.55);font-size:0.9rem;
+                    line-height:1.6;margin-bottom:28px;">
+                You need to be logged in to access this feature.
+            </p>
+            <!-- Buttons -->
+            <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+                <a href="login.html" style="flex:1;min-width:130px;
+                    background:linear-gradient(135deg,#40916c,#74c69d);color:#fff;
+                    border:none;border-radius:50px;padding:12px 24px;font-size:.88rem;
+                    font-weight:700;text-decoration:none;display:inline-flex;
+                    align-items:center;justify-content:center;gap:8px;
+                    font-family:'Inter',sans-serif;transition:transform .2s;"
+                    onmouseover="this.style.transform='translateY(-2px)'"
+                    onmouseout="this.style.transform='none'">
+                    <i class="fas fa-sign-in-alt"></i> Login
+                </a>
+                <a href="signup.html" style="flex:1;min-width:130px;
+                    background:rgba(255,255,255,.07);color:rgba(255,255,255,.85);
+                    border:1px solid rgba(255,255,255,.15);border-radius:50px;
+                    padding:12px 24px;font-size:.88rem;font-weight:600;text-decoration:none;
+                    display:inline-flex;align-items:center;justify-content:center;gap:8px;
+                    font-family:'Inter',sans-serif;transition:transform .2s;"
+                    onmouseover="this.style.transform='translateY(-2px)'"
+                    onmouseout="this.style.transform='none'">
+                    <i class="fas fa-user-plus"></i> Sign Up Free
+                </a>
+            </div>
+            <!-- Close -->
+            <button onclick="closeLoginModal()" style="position:absolute;top:16px;right:16px;
+                background:rgba(255,255,255,.08);border:none;color:rgba(255,255,255,.5);
+                width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:.9rem;
+                display:flex;align-items:center;justify-content:center;transition:all .2s;"
+                onmouseover="this.style.background='rgba(248,113,113,.2)';this.style.color='#f87171'"
+                onmouseout="this.style.background='rgba(255,255,255,.08)';this.style.color='rgba(255,255,255,.5)'">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    </div>
+    <style>
+        @keyframes modalIn {
+            from { opacity:0; transform:scale(.92) translateY(20px); }
+            to   { opacity:1; transform:scale(1)   translateY(0); }
+        }
+    </style>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="script.js"></script>
+    <script>
+        // ── Navbar scroll effect ──
+        window.addEventListener('scroll', () => {
+            document.getElementById('mainNav')
+                .classList.toggle('scrolled', window.scrollY > 50);
+        });
+
+        // Upload zone events are handled entirely by script.js
+
+        // ── Check auth & update navbar on load ──
+        document.addEventListener('DOMContentLoaded', checkAndUpdateNav);
+
+        async function checkAndUpdateNav() {
+            try {
+                const res  = await fetch('auth.php?action=check');
+                const data = await res.json();
+                if (data.success && data.authenticated) {
+                    document.querySelectorAll('.guest-nav').forEach(el => el.style.display = 'none');
+                    document.querySelectorAll('.user-nav').forEach(el => el.style.display = 'block');
+
+                    // Show full name (First + Last), fallback to email
+                    const nameSpan = document.getElementById('userDisplayName');
+                    if (nameSpan && data.user) {
+                        const full = [data.user.first_name, data.user.last_name].filter(Boolean).join(' ');
+                        nameSpan.textContent = full || data.user.email || '';
+                    }
+                    // Admin → clicking name goes to admin panel
+                    const navLink = document.getElementById('userNavLink');
+                    if (navLink && data.is_admin) {
+                        navLink.href = 'admin.php';
+                        navLink.title = 'Go to Admin Dashboard';
+                    }
+                }
+            } catch (e) { /* PHP not running */ }
+        }
+
+        // ── Beautiful Login Required Modal ──
+        function showLoginRequiredModal(title, msg) {
+            document.getElementById('loginModalTitle').textContent = title || 'Login Required';
+            document.getElementById('loginModalMsg').textContent   = msg   || 'You need to be logged in to access this feature.';
+            const m = document.getElementById('loginRequiredModal');
+            m.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+        function closeLoginModal() {
+            document.getElementById('loginRequiredModal').style.display = 'none';
+            document.body.style.overflow = '';
+        }
+        // Close on Escape key
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLoginModal(); });
+
+        // ── Intercept Gallery link for guests ──
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('a[href="gallery.php"]').forEach(link => {
+                link.addEventListener('click', async function(e) {
+                    try {
+                        const res  = await fetch('auth.php?action=check');
+                        const data = await res.json();
+                        if (!data.authenticated) {
+                            e.preventDefault();
+                            showLoginRequiredModal(
+                                '🐦 Gallery — Members Only',
+                                'Your personal bird identification gallery is private. Please log in to view your saved identifications and sightings.'
+                            );
+                        }
+                    } catch(err) { /* let it navigate */ }
+                });
+            });
+        });
+
+        async function handleLogout() {
+            try { await fetch('auth.php?action=logout', { method: 'POST' }); } catch (e) {}
+            document.querySelectorAll('.user-nav').forEach(el => el.style.display = 'none');
+            document.querySelectorAll('.guest-nav').forEach(el => el.style.display = 'block');
+            window.location.href = 'index.html';
+        }
+    </script>
 </body>
 </html>

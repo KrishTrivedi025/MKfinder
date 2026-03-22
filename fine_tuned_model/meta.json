@@ -1,0 +1,14 @@
+{
+  "base_model": "prithivMLmods/Bird-Species-Classifier-526",
+  "trained_on": [
+    "American Robin",
+    "American Robin"
+  ],
+  "model_labels": [
+    "AMERICAN ROBIN",
+    "AMERICAN ROBIN"
+  ],
+  "trained_at": "2026-03-15 10:37:23",
+  "epochs": 5,
+  "num_images": 2
+}
