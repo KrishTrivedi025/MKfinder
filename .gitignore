@@ -1,0 +1,27 @@
+# Training data / large ML artifacts (kept locally, not in git)
+bird_dataset/
+model/
+.torch_cache/
+
+# Runtime-generated uploads (keep the directory + its security config only)
+uploads/*
+!uploads/.htaccess
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+env/
+
+# Env / secrets
+.env
+*.env.local
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
