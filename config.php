@@ -39,6 +39,7 @@ define('SUPPORTED_SPECIES', [
 // ──────────────────────────────────────
 define('IDENTIFICATION_API_KEY', getenv('BIRD_IDENTIFICATION_API_KEY') ?: '');
 define('IDENTIFICATION_API_URL', getenv('BIRD_IDENTIFICATION_API_URL') ?: '');
+define('OPENROUTER_API_KEY',     getenv('OPENROUTER_API_KEY') ?: '');
 
 // ──────────────────────────────────────
 // SESSION / SECURITY

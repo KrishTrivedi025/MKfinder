@@ -7,7 +7,11 @@ if (!isset($_SESSION['is_admin']) || $_SESSION['is_admin'] !== true) {
 }
 header('Content-Type: application/json');
 
-$apiKey = 'REDACTED_OPENROUTER_KEY';
+$apiKey = OPENROUTER_API_KEY;
+if (empty($apiKey)) {
+    echo json_encode(['error' => 'OPENROUTER_API_KEY is not configured. Set it as an environment variable.']);
+    exit;
+}
 
 if (($_POST['action'] ?? '') === 'getmodels') {
     $ch = curl_init('https://openrouter.ai/api/v1/models');
